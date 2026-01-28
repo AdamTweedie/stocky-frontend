@@ -6,6 +6,57 @@
 
 @layer base {
   :root {
+    --background: 210 40% 98%;
+    --foreground: 220 20% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 220 20% 10%;
+
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 210 40% 92%;
+    --accent-foreground: 220 20% 10%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 220 20% 10%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    --chart-1: 217 91% 60%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 0 72% 51%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(230 85% 55%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(214 32% 95%) 50%, hsl(210 40% 98%) 100%);
+
+    --shadow-glow: 0 0 40px -10px hsl(217 91% 60% / 0.3);
+    --shadow-card: 0 4px 24px -4px hsl(0 0% 0% / 0.1);
+  }
+
+  .dark {
     --background: 220 20% 4%;
     --foreground: 210 20% 98%;
 
@@ -40,8 +91,6 @@
     --input: 220 14% 16%;
     --ring: 142 70% 45%;
 
-    --radius: 0.75rem;
-
     --chart-1: 142 70% 45%;
     --chart-2: 199 89% 48%;
     --chart-3: 38 92% 50%;
@@ -54,11 +103,6 @@
 
     --shadow-glow: 0 0 40px -10px hsl(142 70% 45% / 0.3);
     --shadow-card: 0 4px 24px -4px hsl(0 0% 0% / 0.4);
-  }
-
-  .dark {
-    --background: 220 20% 4%;
-    --foreground: 210 20% 98%;
   }
 }
 
@@ -136,10 +180,10 @@
 
   @keyframes pulseGlow {
     0%, 100% {
-      box-shadow: 0 0 20px -5px hsl(142 70% 45% / 0.3);
+      box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
     }
     50% {
-      box-shadow: 0 0 30px -5px hsl(142 70% 45% / 0.5);
+      box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.5);
     }
   }
 }

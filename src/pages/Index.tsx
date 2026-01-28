@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Header from '@/components/Header';
 import StockSearch from '@/components/StockSearch';
 import Watchlist from '@/components/Watchlist';
@@ -7,7 +6,6 @@ import { useWatchlist } from '@/hooks/useWatchlist';
 
 const Index = () => {
   const { watchlist, addStock, removeStock, isInWatchlist } = useWatchlist();
-  const [activeStock, setActiveStock] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,14 +30,12 @@ const Index = () => {
           <Watchlist
             stocks={watchlist}
             onRemove={removeStock}
-            activeStock={activeStock}
-            onSelectStock={setActiveStock}
           />
         </section>
 
         {/* News Feed Section */}
         <section className="animate-slide-up relative z-0" style={{ animationDelay: '200ms' }}>
-          <NewsFeed watchlist={watchlist} activeStock={activeStock} />
+          <NewsFeed watchlist={watchlist} />
         </section>
       </main>
 

@@ -5,11 +5,9 @@ import { Stock } from '@/types/stock';
 interface WatchlistProps {
   stocks: Stock[];
   onRemove: (symbol: string) => void;
-  activeStock: string | null;
-  onSelectStock: (symbol: string | null) => void;
 }
 
-const Watchlist = ({ stocks, onRemove, activeStock, onSelectStock }: WatchlistProps) => {
+const Watchlist = ({ stocks, onRemove }: WatchlistProps) => {
   if (stocks.length === 0) {
     return null;
   }
@@ -30,10 +28,6 @@ const Watchlist = ({ stocks, onRemove, activeStock, onSelectStock }: WatchlistPr
             key={stock.symbol}
             stock={stock}
             onRemove={onRemove}
-            isActive={activeStock === stock.symbol}
-            onClick={() =>
-              onSelectStock(activeStock === stock.symbol ? null : stock.symbol)
-            }
           />
         ))}
       </div>

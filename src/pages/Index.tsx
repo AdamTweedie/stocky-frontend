@@ -15,7 +15,7 @@ const Index = () => {
       
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <section className="text-center mb-12 animate-fade-in">
+        <section className="text-center mb-12 animate-fade-in relative z-40">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
             Track Stock News in{' '}
             <span className="gradient-text">Real-Time</span>
@@ -28,7 +28,7 @@ const Index = () => {
         </section>
 
         {/* Watchlist Section */}
-        <section className="mb-10 animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <section className="mb-10 animate-slide-up relative z-10" style={{ animationDelay: '100ms' }}>
           <Watchlist
             stocks={watchlist}
             onRemove={removeStock}
@@ -38,7 +38,7 @@ const Index = () => {
         </section>
 
         {/* News Feed Section */}
-        <section className="animate-slide-up" style={{ animationDelay: '200ms' }}>
+        <section className="animate-slide-up relative z-0" style={{ animationDelay: '200ms' }}>
           <NewsFeed watchlist={watchlist} activeStock={activeStock} />
         </section>
       </main>

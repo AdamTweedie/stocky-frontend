@@ -6,16 +6,16 @@ interface StockPieProps {
   onClick: () => void;
 }
 
-// Vibrant colors for the pie segments
+// Neon/tech-style colors (matching EditPieDialog)
 const COLORS = [
-  'hsl(142, 70%, 45%)',   // green
-  'hsl(217, 91%, 60%)',   // blue
-  'hsl(38, 92%, 50%)',    // orange
-  'hsl(280, 65%, 60%)',   // purple
-  'hsl(0, 72%, 51%)',     // red
-  'hsl(199, 89%, 48%)',   // cyan
-  'hsl(330, 80%, 60%)',   // pink
-  'hsl(60, 70%, 50%)',    // yellow
+  'hsl(150, 100%, 50%)',  // neon green
+  'hsl(190, 100%, 50%)',  // neon cyan
+  'hsl(280, 100%, 65%)',  // neon purple
+  'hsl(320, 100%, 60%)',  // neon pink
+  'hsl(45, 100%, 50%)',   // neon yellow
+  'hsl(200, 100%, 55%)',  // electric blue
+  'hsl(0, 100%, 60%)',    // neon red
+  'hsl(260, 100%, 70%)',  // lavender neon
 ];
 
 const StockPie = ({ stocks, onClick }: StockPieProps) => {

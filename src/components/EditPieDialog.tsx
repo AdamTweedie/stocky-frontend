@@ -21,15 +21,16 @@ interface EditPieDialogProps {
   onRemoveStock: (symbol: string) => void;
 }
 
+// Neon/tech-style colors
 const COLORS = [
-  'hsl(142, 70%, 45%)',
-  'hsl(217, 91%, 60%)',
-  'hsl(38, 92%, 50%)',
-  'hsl(280, 65%, 60%)',
-  'hsl(0, 72%, 51%)',
-  'hsl(199, 89%, 48%)',
-  'hsl(330, 80%, 60%)',
-  'hsl(60, 70%, 50%)',
+  'hsl(150, 100%, 50%)',  // neon green
+  'hsl(190, 100%, 50%)',  // neon cyan
+  'hsl(280, 100%, 65%)',  // neon purple
+  'hsl(320, 100%, 60%)',  // neon pink
+  'hsl(45, 100%, 50%)',   // neon yellow
+  'hsl(200, 100%, 55%)',  // electric blue
+  'hsl(0, 100%, 60%)',    // neon red
+  'hsl(260, 100%, 70%)',  // lavender neon
 ];
 
 const EditPieDialog = ({ 
@@ -67,11 +68,15 @@ const EditPieDialog = ({
     setSearchQuery('');
   };
 
+  const showSuggestions = searchQuery.trim().length > 0;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card border-border max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg bg-card/95 backdrop-blur-xl border-primary/20 max-h-[90vh] flex flex-col shadow-[0_0_40px_rgba(0,255,200,0.15)]">
         <DialogHeader>
-          <DialogTitle className="text-center">Edit Pie</DialogTitle>
+          <DialogTitle className="text-center text-lg font-bold bg-gradient-to-r from-primary to-cyan-400 bg-clip-text text-transparent">
+            Edit Pie
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-4 py-4 flex-1 overflow-hidden">
@@ -102,75 +107,91 @@ const EditPieDialog = ({
             </div>
           </div>
 
-          {/* Search Section - Always visible */}
-          <div className="w-full space-y-2">
+          {/* Search Section */}
+          <div className="w-full space-y-2 relative">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/70" />
               <Input
-                placeholder="Search stocks..."
+                placeholder="Type to search stocks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-background/50 border-primary/30 focus:border-primary focus:ring-primary/30 placeholder:text-muted-foreground/60"
               />
             </div>
             
-            <ScrollArea className="h-32 rounded-md border">
-              <div className="p-2 space-y-1">
-                {filteredStocks.map((stock) => {
-                  const inList = isInWatchlist(stock.symbol);
-                  return (
-                    <div
-                      key={stock.symbol}
-                      className={`flex items-center justify-between p-2 rounded-md transition-colors ${
-                        inList ? 'bg-accent/50' : 'hover:bg-accent cursor-pointer'
-                      }`}
-                      onClick={() => !inList && handleAddStock(stock)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="stock-ticker font-medium text-sm">{stock.symbol}</span>
-                        <span className="text-xs text-muted-foreground truncate">{stock.name}</span>
-                      </div>
-                      {inList ? (
-                        <Check className="w-4 h-4 text-success shrink-0" />
-                      ) : (
-                        <Plus className="w-4 h-4 text-muted-foreground shrink-0" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </ScrollArea>
+            {showSuggestions && (
+              <ScrollArea className="h-40 rounded-lg border border-primary/20 bg-background/80 backdrop-blur-sm shadow-[0_0_20px_rgba(0,255,200,0.1)]">
+                <div className="p-2 space-y-1">
+                  {filteredStocks.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No stocks found</p>
+                  ) : (
+                    filteredStocks.map((stock) => {
+                      const inList = isInWatchlist(stock.symbol);
+                      return (
+                        <div
+                          key={stock.symbol}
+                          className={`flex items-center justify-between p-2.5 rounded-lg transition-all ${
+                            inList 
+                              ? 'bg-primary/10 border border-primary/20' 
+                              : 'hover:bg-primary/5 hover:border-primary/10 border border-transparent cursor-pointer'
+                          }`}
+                          onClick={() => !inList && handleAddStock(stock)}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="stock-ticker font-semibold text-sm text-primary">{stock.symbol}</span>
+                            <span className="text-xs text-muted-foreground truncate">{stock.name}</span>
+                          </div>
+                          {inList ? (
+                            <Check className="w-4 h-4 text-primary shrink-0" />
+                          ) : (
+                            <Plus className="w-4 h-4 text-primary/60 shrink-0" />
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </ScrollArea>
+            )}
           </div>
 
           {/* Holdings list */}
-          <div className="w-full space-y-2 flex-1 min-h-0">
-            <h4 className="text-sm font-medium text-muted-foreground">Holdings ({stocks.length})</h4>
-            <ScrollArea className="h-36">
+          <div className="w-full space-y-3 flex-1 min-h-0">
+            <h4 className="text-sm font-semibold text-primary/80 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              Holdings ({stocks.length})
+            </h4>
+            <ScrollArea className="h-48">
               <div className="space-y-2 pr-4">
                 {stocks.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No stocks added yet. Search above to add stocks.
-                  </p>
+                  <div className="text-center py-8 space-y-2">
+                    <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                      <Plus className="w-6 h-6 text-primary/50" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      No stocks yet. Start typing to search.
+                    </p>
+                  </div>
                 ) : (
                   stocks.map((stock, index) => (
                     <div
                       key={stock.symbol}
-                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-background/80 to-background/40 border border-primary/10 hover:border-primary/30 transition-all group"
                     >
                       <div className="flex items-center gap-3">
                         <div 
-                          className="w-3 h-3 rounded-full shrink-0"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          className="w-3 h-3 rounded-full shrink-0 shadow-[0_0_8px_currentColor]"
+                          style={{ backgroundColor: COLORS[index % COLORS.length], color: COLORS[index % COLORS.length] }}
                         />
                         <div className="min-w-0">
-                          <span className="stock-ticker font-medium">{stock.symbol}</span>
+                          <span className="stock-ticker font-semibold text-foreground">{stock.symbol}</span>
                           <p className="text-xs text-muted-foreground truncate">{stock.name}</p>
                         </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                        className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity"
                         onClick={() => onRemoveStock(stock.symbol)}
                       >
                         <X className="w-4 h-4" />

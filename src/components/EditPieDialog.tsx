@@ -40,7 +40,6 @@ const EditPieDialog = ({
   onRemoveStock 
 }: EditPieDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
 
   const pieData = stocks.map((stock, index) => ({
     name: stock.symbol,
@@ -66,27 +65,26 @@ const EditPieDialog = ({
   const handleAddStock = (stock: Stock) => {
     onAddStock(stock);
     setSearchQuery('');
-    setShowSearch(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card border-border">
+      <DialogContent className="sm:max-w-md bg-card border-border max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-center">Edit Pie</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col items-center gap-6 py-4">
+        <div className="flex flex-col items-center gap-4 py-4 flex-1 overflow-hidden">
           {/* Pie Chart */}
-          <div className="relative w-48 h-48">
+          <div className="relative w-40 h-40 shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
+                  innerRadius={50}
+                  outerRadius={75}
                   paddingAngle={stocks.length > 1 ? 3 : 0}
                   dataKey="value"
                   stroke="none"
@@ -104,68 +102,54 @@ const EditPieDialog = ({
             </div>
           </div>
 
-          {/* Add button */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => setShowSearch(!showSearch)}
-          >
-            <Plus className="w-4 h-4" />
-            Add Stock
-          </Button>
-
-          {/* Search input */}
-          {showSearch && (
-            <div className="w-full space-y-2 animate-fade-in">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search stocks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                  autoFocus
-                />
-              </div>
-              
-              <ScrollArea className="h-40 rounded-md border">
-                <div className="p-2 space-y-1">
-                  {filteredStocks.map((stock) => {
-                    const inList = isInWatchlist(stock.symbol);
-                    return (
-                      <div
-                        key={stock.symbol}
-                        className={`flex items-center justify-between p-2 rounded-md transition-colors ${
-                          inList ? 'opacity-50' : 'hover:bg-accent cursor-pointer'
-                        }`}
-                        onClick={() => !inList && handleAddStock(stock)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="stock-ticker font-medium text-sm">{stock.symbol}</span>
-                          <span className="text-xs text-muted-foreground">{stock.name}</span>
-                        </div>
-                        {inList ? (
-                          <Check className="w-4 h-4 text-success" />
-                        ) : (
-                          <Plus className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
+          {/* Search Section - Always visible */}
+          <div className="w-full space-y-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search stocks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          )}
+            
+            <ScrollArea className="h-32 rounded-md border">
+              <div className="p-2 space-y-1">
+                {filteredStocks.map((stock) => {
+                  const inList = isInWatchlist(stock.symbol);
+                  return (
+                    <div
+                      key={stock.symbol}
+                      className={`flex items-center justify-between p-2 rounded-md transition-colors ${
+                        inList ? 'bg-accent/50' : 'hover:bg-accent cursor-pointer'
+                      }`}
+                      onClick={() => !inList && handleAddStock(stock)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="stock-ticker font-medium text-sm">{stock.symbol}</span>
+                        <span className="text-xs text-muted-foreground truncate">{stock.name}</span>
+                      </div>
+                      {inList ? (
+                        <Check className="w-4 h-4 text-success shrink-0" />
+                      ) : (
+                        <Plus className="w-4 h-4 text-muted-foreground shrink-0" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </div>
 
           {/* Holdings list */}
-          <div className="w-full space-y-2">
+          <div className="w-full space-y-2 flex-1 min-h-0">
             <h4 className="text-sm font-medium text-muted-foreground">Holdings ({stocks.length})</h4>
-            <ScrollArea className="h-48">
+            <ScrollArea className="h-36">
               <div className="space-y-2 pr-4">
                 {stocks.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No stocks added yet. Click "Add Stock" to get started.
+                    No stocks added yet. Search above to add stocks.
                   </p>
                 ) : (
                   stocks.map((stock, index) => (
@@ -175,18 +159,18 @@ const EditPieDialog = ({
                     >
                       <div className="flex items-center gap-3">
                         <div 
-                          className="w-3 h-3 rounded-full"
+                          className="w-3 h-3 rounded-full shrink-0"
                           style={{ backgroundColor: COLORS[index % COLORS.length] }}
                         />
-                        <div>
+                        <div className="min-w-0">
                           <span className="stock-ticker font-medium">{stock.symbol}</span>
-                          <p className="text-xs text-muted-foreground">{stock.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{stock.name}</p>
                         </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
                         onClick={() => onRemoveStock(stock.symbol)}
                       >
                         <X className="w-4 h-4" />

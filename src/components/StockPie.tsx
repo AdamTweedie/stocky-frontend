@@ -32,18 +32,21 @@ const StockPie = ({ stocks, onClick }: StockPieProps) => {
 
   return (
     <div 
-      className="relative w-28 h-28 cursor-pointer group shrink-0"
+      className="relative w-36 h-36 cursor-pointer group shrink-0"
       onClick={onClick}
     >
+      {/* Glow effect */}
+      <div className="absolute inset-2 rounded-full bg-primary/20 blur-xl group-hover:bg-primary/30 transition-all" />
+      
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={chartData}
             cx="50%"
             cy="50%"
-            innerRadius={32}
-            outerRadius={50}
-            paddingAngle={stocks.length > 1 ? 4 : 0}
+            innerRadius={40}
+            outerRadius={65}
+            paddingAngle={0}
             dataKey="value"
             stroke="none"
           >
@@ -60,15 +63,7 @@ const StockPie = ({ stocks, onClick }: StockPieProps) => {
       
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Your</span>
-        <span className="text-xs font-bold text-foreground">News</span>
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Pie</span>
-      </div>
-      
-      {/* Hover overlay */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="absolute inset-0 bg-background/60 rounded-full" />
-        <span className="relative text-xs font-medium text-primary">Edit</span>
+        <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">Edit</span>
       </div>
     </div>
   );

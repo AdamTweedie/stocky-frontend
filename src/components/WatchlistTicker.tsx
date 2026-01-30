@@ -50,35 +50,29 @@ const WatchlistTicker = ({ stocks }: WatchlistTickerProps) => {
           return (
             <div
               key={`${stock.symbol}-${index}`}
-              className="flex items-center gap-3 px-4 py-2 bg-secondary/50 rounded-lg shrink-0"
+              className="flex items-center justify-between gap-4 px-4 py-3 bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl shrink-0 min-w-[200px]"
             >
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
-                  <span className="stock-ticker text-xs font-semibold text-primary">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <span className="stock-ticker text-xs font-bold text-primary">
                     {stock.symbol.slice(0, 2)}
                   </span>
                 </div>
-                <span className="stock-ticker font-semibold text-sm">{stock.symbol}</span>
+                <div className="flex flex-col">
+                  <span className="stock-ticker font-semibold text-sm text-foreground">{stock.symbol}</span>
+                  <span className="text-xs text-muted-foreground">${stock.price?.toFixed(2)}</span>
+                </div>
               </div>
               
-              <span className="text-sm font-mono text-muted-foreground">
-                ${stock.price?.toFixed(2)}
-              </span>
-              
               <div
-                className={`flex items-center gap-1 text-xs font-medium ${
-                  isPositive ? 'text-success' : 'text-destructive'
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                  isPositive 
+                    ? 'bg-success/20 text-success' 
+                    : 'bg-destructive/20 text-destructive'
                 }`}
               >
-                {isPositive ? (
-                  <TrendingUp className="w-3 h-3" />
-                ) : (
-                  <TrendingDown className="w-3 h-3" />
-                )}
-                <span>
-                  {isPositive ? '+' : ''}
-                  {stock.changePercent?.toFixed(2)}%
-                </span>
+                {isPositive ? '+' : ''}
+                {stock.changePercent?.toFixed(2)}%
               </div>
             </div>
           );

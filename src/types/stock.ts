@@ -6,6 +6,8 @@ export interface Stock {
   changePercent?: number;
 }
 
+export type NewsCategory = 'Tech' | 'Finance' | 'Healthcare' | 'Energy' | 'Retail' | 'Auto' | 'Media';
+
 export interface NewsArticle {
   id: string;
   title: string;
@@ -15,4 +17,7 @@ export interface NewsArticle {
   publishedAt: string;
   stockSymbol: string;
   sentiment?: 'positive' | 'negative' | 'neutral';
+  category?: NewsCategory;
+  isExclusive?: boolean;
+  isLive?: boolean;
 }

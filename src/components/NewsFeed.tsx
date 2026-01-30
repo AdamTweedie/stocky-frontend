@@ -1,26 +1,18 @@
 import { useMemo, useState } from 'react';
-import { Newspaper, Sparkles, Clock, Flame, Filter } from 'lucide-react';
-import NewsCard from './NewsCard';
-import { Stock, NewsArticle } from '@/types/stock';
+import { Sparkles } from 'lucide-react';
+import { Stock, NewsArticle, NewsCategory } from '@/types/stock';
 import { generateMockNews } from '@/data/mockData';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import LatestNewsSidebar from './LatestNewsSidebar';
+import FocusSection from './FocusSection';
+import FeaturedNewsCard from './FeaturedNewsCard';
+import SecondaryNewsRow from './SecondaryNewsRow';
 
 interface NewsFeedProps {
   watchlist: Stock[];
 }
 
-type SortOption = 'recent' | 'hottest' | 'stock';
-
 const NewsFeed = ({ watchlist }: NewsFeedProps) => {
-  const [sortBy, setSortBy] = useState<SortOption>('recent');
-  const [stockFilter, setStockFilter] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<NewsCategory | null>(null);
 
   const allNews = useMemo(() => {
     if (watchlist.length === 0) return [];
@@ -30,43 +22,24 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
       articles.push(...generateMockNews(stock.symbol));
     });
 
-    return articles;
+    // Sort by date (most recent first)
+    return articles.sort(
+      (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    );
   }, [watchlist]);
 
-  const sortedNews = useMemo(() => {
-    let filtered = [...allNews];
+  const filteredNews = useMemo(() => {
+    if (!selectedCategory) return allNews;
+    return allNews.filter((article) => article.category === selectedCategory);
+  }, [allNews, selectedCategory]);
 
-    // Apply stock filter
-    if (stockFilter !== 'all') {
-      filtered = filtered.filter((article) => article.stockSymbol === stockFilter);
-    }
-
-    // Apply sorting
-    switch (sortBy) {
-      case 'recent':
-        return filtered.sort(
-          (a, b) =>
-            new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-        );
-      case 'hottest':
-        // Simulate "hotness" by prioritizing positive sentiment and recency
-        return filtered.sort((a, b) => {
-          const sentimentScore = { positive: 3, neutral: 2, negative: 1 };
-          const aScore = sentimentScore[a.sentiment || 'neutral'];
-          const bScore = sentimentScore[b.sentiment || 'neutral'];
-          if (bScore !== aScore) return bScore - aScore;
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-        });
-      case 'stock':
-        return filtered.sort((a, b) => {
-          const symbolCompare = a.stockSymbol.localeCompare(b.stockSymbol);
-          if (symbolCompare !== 0) return symbolCompare;
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-        });
-      default:
-        return filtered;
-    }
-  }, [allNews, sortBy, stockFilter]);
+  // Split articles for layout
+  const featuredArticle = filteredNews[0];
+  const secondFeatured = filteredNews[1];
+  const thirdFeatured = filteredNews[2];
+  const fourthFeatured = filteredNews[3];
+  const secondaryArticles = filteredNews.slice(4, 7);
+  const sidebarArticles = allNews; // Sidebar always shows all news
 
   if (watchlist.length === 0) {
     return (
@@ -83,56 +56,66 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-2">
-          <Newspaper className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold">Latest Headlines</h2>
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-            {sortedNews.length} articles
-          </span>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {/* Main Content Area - 3 columns */}
+      <div className="lg:col-span-3 space-y-6">
+        {/* Featured Grid - Asymmetric layout */}
+        {filteredNews.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Large featured article */}
+            {featuredArticle && (
+              <div className="md:col-span-2">
+                <FeaturedNewsCard article={featuredArticle} size="large" />
+              </div>
+            )}
+            
+            {/* Stacked smaller articles on the right */}
+            <div className="space-y-4">
+              {secondFeatured && (
+                <FeaturedNewsCard article={secondFeatured} size="small" />
+              )}
+              {thirdFeatured && (
+                <FeaturedNewsCard article={thirdFeatured} size="small" />
+              )}
+            </div>
+          </div>
+        )}
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          {/* Sort Tabs */}
-          <Tabs value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <TabsList className="h-9">
-              <TabsTrigger value="recent" className="gap-1.5 text-xs px-3">
-                <Clock className="w-3.5 h-3.5" />
-                Recent
-              </TabsTrigger>
-              <TabsTrigger value="hottest" className="gap-1.5 text-xs px-3">
-                <Flame className="w-3.5 h-3.5" />
-                Hottest
-              </TabsTrigger>
-              <TabsTrigger value="stock" className="gap-1.5 text-xs px-3">
-                <Filter className="w-3.5 h-3.5" />
-                By Stock
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+        {/* Secondary Row - 3 equal columns */}
+        {secondaryArticles.length > 0 && (
+          <SecondaryNewsRow articles={secondaryArticles} />
+        )}
 
-          {/* Stock Filter */}
-          <Select value={stockFilter} onValueChange={setStockFilter}>
-            <SelectTrigger className="w-[140px] h-9 text-xs">
-              <SelectValue placeholder="Filter by stock" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Stocks</SelectItem>
-              {watchlist.map((stock) => (
-                <SelectItem key={stock.symbol} value={stock.symbol}>
-                  {stock.symbol}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Third featured section */}
+        {fourthFeatured && filteredNews.length > 4 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border/30 pt-6">
+            <FeaturedNewsCard article={fourthFeatured} size="medium" />
+            {filteredNews[5] && (
+              <div className="space-y-4">
+                <FeaturedNewsCard article={filteredNews[5]} size="small" />
+                {filteredNews[6] && (
+                  <FeaturedNewsCard article={filteredNews[6]} size="small" />
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="grid gap-4">
-        {sortedNews.map((article, index) => (
-          <NewsCard key={article.id} article={article} index={index} />
-        ))}
+      {/* Sidebar - 1 column */}
+      <div className="space-y-8">
+        {/* Latest News */}
+        <div className="glass-card p-4">
+          <LatestNewsSidebar articles={sidebarArticles} />
+        </div>
+
+        {/* In Focus Section */}
+        <div className="glass-card p-4">
+          <FocusSection 
+            selectedCategory={selectedCategory} 
+            onCategorySelect={setSelectedCategory}
+          />
+        </div>
       </div>
     </div>
   );

@@ -2,9 +2,10 @@ import { NewsArticle } from '@/types/stock';
 
 interface SecondaryNewsRowProps {
   articles: NewsArticle[];
+  onArticleClick?: (article: NewsArticle) => void;
 }
 
-const SecondaryNewsRow = ({ articles }: SecondaryNewsRowProps) => {
+const SecondaryNewsRow = ({ articles, onArticleClick }: SecondaryNewsRowProps) => {
   // Take 3 articles for the secondary row
   const displayArticles = articles.slice(0, 3);
 
@@ -13,10 +14,10 @@ const SecondaryNewsRow = ({ articles }: SecondaryNewsRowProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-border/30 pt-6">
       {displayArticles.map((article) => (
-        <a
+        <button
           key={article.id}
-          href={article.url}
-          className="group"
+          onClick={() => onArticleClick?.(article)}
+          className="group text-left"
         >
           <div className="space-y-2">
             <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -26,7 +27,7 @@ const SecondaryNewsRow = ({ articles }: SecondaryNewsRowProps) => {
               {article.title}
             </h4>
           </div>
-        </a>
+        </button>
       ))}
     </div>
   );

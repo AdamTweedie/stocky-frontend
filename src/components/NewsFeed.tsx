@@ -6,6 +6,7 @@ import LatestNewsSidebar from './LatestNewsSidebar';
 import FocusSection from './FocusSection';
 import FeaturedNewsCard from './FeaturedNewsCard';
 import SecondaryNewsRow from './SecondaryNewsRow';
+import NewsDetailDialog from './NewsDetailDialog';
 import { Button } from '@/components/ui/button';
 
 interface NewsFeedProps {
@@ -16,6 +17,13 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory | null>(null);
   const [shuffleKey, setShuffleKey] = useState(0);
   const [isShaking, setIsShaking] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleArticleClick = useCallback((article: NewsArticle) => {
+    setSelectedArticle(article);
+    setDialogOpen(true);
+  }, []);
 
   const allNews = useMemo(() => {
     if (watchlist.length === 0) return [];
@@ -103,17 +111,17 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
             {/* Large featured article */}
             {featuredArticle && (
               <div className="md:col-span-2">
-                <FeaturedNewsCard article={featuredArticle} size="large" />
+                <FeaturedNewsCard article={featuredArticle} size="large" onArticleClick={handleArticleClick} />
               </div>
             )}
             
             {/* Stacked smaller articles on the right */}
             <div className="space-y-4">
               {secondFeatured && (
-                <FeaturedNewsCard article={secondFeatured} size="small" />
+                <FeaturedNewsCard article={secondFeatured} size="small" onArticleClick={handleArticleClick} />
               )}
               {thirdFeatured && (
-                <FeaturedNewsCard article={thirdFeatured} size="small" />
+                <FeaturedNewsCard article={thirdFeatured} size="small" onArticleClick={handleArticleClick} />
               )}
             </div>
           </div>
@@ -122,19 +130,19 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
         {/* Secondary Row - 3 equal columns */}
         {secondaryArticles.length > 0 && (
           <div className={isShaking ? 'animate-shake' : ''}>
-            <SecondaryNewsRow articles={secondaryArticles} />
+            <SecondaryNewsRow articles={secondaryArticles} onArticleClick={handleArticleClick} />
           </div>
         )}
 
         {/* Third featured section */}
         {fourthFeatured && shuffledMainNews.length > 4 && (
           <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border/30 pt-6 ${isShaking ? 'animate-shake' : ''}`}>
-            <FeaturedNewsCard article={fourthFeatured} size="medium" />
+            <FeaturedNewsCard article={fourthFeatured} size="medium" onArticleClick={handleArticleClick} />
             {shuffledMainNews[5] && (
               <div className="space-y-4">
-                <FeaturedNewsCard article={shuffledMainNews[5]} size="small" />
+                <FeaturedNewsCard article={shuffledMainNews[5]} size="small" onArticleClick={handleArticleClick} />
                 {shuffledMainNews[6] && (
-                  <FeaturedNewsCard article={shuffledMainNews[6]} size="small" />
+                  <FeaturedNewsCard article={shuffledMainNews[6]} size="small" onArticleClick={handleArticleClick} />
                 )}
               </div>
             )}
@@ -146,7 +154,7 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
       <div className="space-y-8">
         {/* Latest News */}
         <div className="glass-card p-4">
-          <LatestNewsSidebar articles={sidebarArticles} />
+          <LatestNewsSidebar articles={sidebarArticles} onArticleClick={handleArticleClick} />
         </div>
 
         {/* In Focus Section */}
@@ -157,6 +165,12 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
           />
         </div>
       </div>
+      {/* News Detail Dialog */}
+      <NewsDetailDialog
+        article={selectedArticle}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </div>
   );
 };

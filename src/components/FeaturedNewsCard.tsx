@@ -5,15 +5,21 @@ import { formatDistanceToNow } from 'date-fns';
 interface FeaturedNewsCardProps {
   article: NewsArticle;
   size: 'large' | 'medium' | 'small';
+  onArticleClick?: (article: NewsArticle) => void;
 }
 
-const FeaturedNewsCard = ({ article, size }: FeaturedNewsCardProps) => {
+const FeaturedNewsCard = ({ article, size, onArticleClick }: FeaturedNewsCardProps) => {
   const isLarge = size === 'large';
   const isMedium = size === 'medium';
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onArticleClick?.(article);
+  };
+
   return (
     <article className={`group relative ${isLarge ? 'col-span-2 row-span-2' : isMedium ? 'col-span-1 row-span-2' : ''}`}>
-      <a href={article.url} className="block h-full">
+      <button onClick={handleClick} className="block h-full w-full text-left">
         {/* Card with gradient background */}
         <div className={`h-full glass-card overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] ${
           isLarge ? 'p-6' : isMedium ? 'p-5' : 'p-4'
@@ -69,7 +75,7 @@ const FeaturedNewsCard = ({ article, size }: FeaturedNewsCardProps) => {
             <ExternalLink className="w-4 h-4 text-primary" />
           </div>
         </div>
-      </a>
+      </button>
     </article>
   );
 };

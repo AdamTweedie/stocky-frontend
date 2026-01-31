@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 
 interface LatestNewsSidebarProps {
   articles: NewsArticle[];
+  onArticleClick?: (article: NewsArticle) => void;
 }
 
-const LatestNewsSidebar = ({ articles }: LatestNewsSidebarProps) => {
+const LatestNewsSidebar = ({ articles, onArticleClick }: LatestNewsSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter articles by search query
@@ -43,10 +44,10 @@ const LatestNewsSidebar = ({ articles }: LatestNewsSidebarProps) => {
       <div className="space-y-0 divide-y divide-border/30">
         {latestArticles.length > 0 ? (
           latestArticles.map((article) => (
-            <a
+            <button
               key={article.id}
-              href={article.url}
-              className="flex gap-3 py-3 group hover:bg-accent/30 -mx-2 px-2 rounded transition-colors"
+              onClick={() => onArticleClick?.(article)}
+              className="flex gap-3 py-3 group hover:bg-accent/30 -mx-2 px-2 rounded transition-colors w-full text-left"
             >
               <span className="text-xs text-primary font-medium shrink-0 w-12">
                 {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: false })}
@@ -54,7 +55,7 @@ const LatestNewsSidebar = ({ articles }: LatestNewsSidebarProps) => {
               <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                 {article.title}
               </span>
-            </a>
+            </button>
           ))
         ) : (
           <div className="py-6 text-center text-sm text-muted-foreground">

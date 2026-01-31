@@ -44,9 +44,9 @@ const StockPie = ({ stocks, onClick }: StockPieProps) => {
             data={chartData}
             cx="50%"
             cy="50%"
-            innerRadius={40}
+            innerRadius={58}
             outerRadius={65}
-            paddingAngle={0}
+            paddingAngle={stocks.length > 1 ? 3 : 0}
             dataKey="value"
             stroke="none"
           >
@@ -63,7 +63,7 @@ const StockPie = ({ stocks, onClick }: StockPieProps) => {
       
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">Edit</span>
+        <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors uppercase underline underline-offset-2">Edit</span>
       </div>
     </div>
   );

@@ -1,9 +1,13 @@
-import { TrendingUp, Sun, Moon } from 'lucide-react';
+import { TrendingUp, Sun, Moon, BarChart3 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useWatchlist } from '@/hooks/useWatchlist';
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
+  const { watchlist } = useWatchlist();
+  const hasStocks = watchlist.length > 0;
 
   return (
     <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
@@ -19,6 +23,14 @@ const Header = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {hasStocks && (
+              <Link to="/sentiment">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sentiment</span>
+                </Button>
+              </Link>
+            )}
             <div className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
               <span className="text-xs font-medium text-primary">Live</span>
             </div>

@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Search, Plus, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Stock } from '@/types/stock';
-import { popularStocks } from '@/data/mockData';
+import { useStockSearch } from '@/hooks/useStockSearch';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface StockSearchProps {
   onAddStock: (stock: Stock) => void;
@@ -14,18 +15,9 @@ const StockSearch = ({ onAddStock, isInWatchlist }: StockSearchProps) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
-  const filteredStocks = useMemo(() => {
-    if (!query.trim()) return popularStocks;
-    
-    const lowerQuery = query.toLowerCase();
-    return popularStocks.filter(
-      stock =>
-        stock.symbol.toLowerCase().includes(lowerQuery) ||
-        stock.name.toLowerCase().includes(lowerQuery)
-    );
-  }, [query]);
+  const { data: filteredStocks = [], isLoading } = useStockSearch(query);
 
-  const showResults = isFocused && filteredStocks.length > 0;
+  const showResults = isFocused && (filteredStocks.length > 0 || isLoading);
 
   return (
     <div className="relative w-full max-w-xl mx-auto z-50">
@@ -44,46 +36,61 @@ const StockSearch = ({ onAddStock, isInWatchlist }: StockSearchProps) => {
 
       {showResults && (
         <div className="absolute top-full left-0 right-0 mt-2 glass-card p-2 max-h-80 overflow-y-auto z-50 animate-fade-in">
-          {filteredStocks.map((stock) => {
-            const inWatchlist = isInWatchlist(stock.symbol);
-            return (
-              <div
-                key={stock.symbol}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                onClick={() => !inWatchlist && onAddStock(stock)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <span className="stock-ticker font-semibold text-primary">
-                      {stock.symbol.slice(0, 2)}
-                    </span>
+          {isLoading ? (
+            <div className="space-y-2 p-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-3 p-3">
+                  <Skeleton className="w-10 h-10 rounded-lg" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-3 w-32" />
                   </div>
-                  <div>
-                    <p className="font-medium stock-ticker">{stock.symbol}</p>
-                    <p className="text-sm text-muted-foreground">{stock.name}</p>
-                  </div>
+                  <Skeleton className="h-8 w-16 rounded-md" />
                 </div>
-                <Button
-                  size="sm"
-                  variant={inWatchlist ? "secondary" : "default"}
-                  className="gap-1.5"
-                  disabled={inWatchlist}
+              ))}
+            </div>
+          ) : (
+            filteredStocks.map((stock) => {
+              const inWatchlist = isInWatchlist(stock.symbol);
+              return (
+                <div
+                  key={stock.symbol}
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => !inWatchlist && onAddStock(stock)}
                 >
-                  {inWatchlist ? (
-                    <>
-                      <Check className="w-4 h-4" />
-                      Added
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      Add
-                    </>
-                  )}
-                </Button>
-              </div>
-            );
-          })}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <span className="stock-ticker font-semibold text-primary">
+                        {stock.symbol.slice(0, 2)}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium stock-ticker">{stock.symbol}</p>
+                      <p className="text-sm text-muted-foreground">{stock.name}</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={inWatchlist ? "secondary" : "default"}
+                    className="gap-1.5"
+                    disabled={inWatchlist}
+                  >
+                    {inWatchlist ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Added
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        Add
+                      </>
+                    )}
+                  </Button>
+                </div>
+              );
+            })
+          )}
         </div>
       )}
     </div>

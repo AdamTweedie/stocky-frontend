@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { X, Search, Plus, Check } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import {
@@ -10,8 +10,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Stock } from '@/types/stock';
-import { popularStocks } from '@/data/mockData';
+import { useStockSearch } from '@/hooks/useStockSearch';
 
 interface EditPieDialogProps {
   open: boolean;
@@ -41,6 +42,7 @@ const EditPieDialog = ({
   onRemoveStock 
 }: EditPieDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: filteredStocks = [], isLoading } = useStockSearch(searchQuery);
 
   const pieData = stocks.map((stock, index) => ({
     name: stock.symbol,
@@ -50,16 +52,6 @@ const EditPieDialog = ({
 
   const emptyData = [{ name: 'Empty', value: 1, color: 'hsl(var(--muted))' }];
   const chartData = stocks.length > 0 ? pieData : emptyData;
-
-  const filteredStocks = useMemo(() => {
-    if (!searchQuery.trim()) return popularStocks;
-    const query = searchQuery.toLowerCase();
-    return popularStocks.filter(
-      stock =>
-        stock.symbol.toLowerCase().includes(query) ||
-        stock.name.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
 
   const isInWatchlist = (symbol: string) => stocks.some(s => s.symbol === symbol);
 
@@ -122,7 +114,16 @@ const EditPieDialog = ({
             {showSuggestions && (
               <ScrollArea className="h-40 rounded-lg border border-primary/20 bg-background/80 backdrop-blur-sm shadow-[0_0_20px_rgba(0,255,200,0.1)]">
                 <div className="p-2 space-y-1">
-                  {filteredStocks.length === 0 ? (
+                  {isLoading ? (
+                    <div className="space-y-2 p-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-2 p-2.5">
+                          <Skeleton className="h-4 w-12" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : filteredStocks.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">No stocks found</p>
                   ) : (
                     filteredStocks.map((stock) => {

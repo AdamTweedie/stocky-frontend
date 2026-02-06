@@ -1,13 +1,14 @@
 import { useMemo, useState, useCallback } from 'react';
 import { Sparkles, RefreshCw } from 'lucide-react';
 import { Stock, NewsArticle, NewsCategory } from '@/types/stock';
-import { generateMockNews } from '@/data/mockData';
+import { useStockNews } from '@/hooks/useStockNews';
 import LatestNewsSidebar from './LatestNewsSidebar';
 import FocusSection from './FocusSection';
 import FeaturedNewsCard from './FeaturedNewsCard';
 import SecondaryNewsRow from './SecondaryNewsRow';
 import NewsDetailDialog from './NewsDetailDialog';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface NewsFeedProps {
   watchlist: Stock[];
@@ -20,24 +21,13 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const symbols = useMemo(() => watchlist.map((s) => s.symbol), [watchlist]);
+  const { data: allNews = [], isLoading, refetch } = useStockNews(symbols);
+
   const handleArticleClick = useCallback((article: NewsArticle) => {
     setSelectedArticle(article);
     setDialogOpen(true);
   }, []);
-
-  const allNews = useMemo(() => {
-    if (watchlist.length === 0) return [];
-
-    const articles: NewsArticle[] = [];
-    watchlist.forEach((stock) => {
-      articles.push(...generateMockNews(stock.symbol));
-    });
-
-    // Sort by date (most recent first)
-    return articles.sort(
-      (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    );
-  }, [watchlist]);
 
   // Shuffled news for main content (affected by refresh)
   const shuffledMainNews = useMemo(() => {
@@ -59,12 +49,13 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   const handleRefresh = useCallback(() => {
     setIsShaking(true);
     setShuffleKey((prev) => prev + 1);
+    // Also refetch from API when not using mock data
+    refetch();
     
-    // Remove shake class after animation completes
     setTimeout(() => {
       setIsShaking(false);
     }, 500);
-  }, []);
+  }, [refetch]);
 
   // Split articles for layout
   const featuredArticle = shuffledMainNews[0];
@@ -84,6 +75,30 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
         <p className="text-muted-foreground max-w-md mx-auto">
           Search and add stocks to your watchlist to see the latest news and market updates
         </p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-3 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="md:col-span-2 h-64 rounded-xl" />
+            <div className="space-y-4">
+              <Skeleton className="h-[7.5rem] rounded-xl" />
+              <Skeleton className="h-[7.5rem] rounded-xl" />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+          </div>
+        </div>
+        <div>
+          <Skeleton className="h-96 rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -108,14 +123,11 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
         {/* Featured Grid - Asymmetric layout */}
         {shuffledMainNews.length > 0 && (
           <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${isShaking ? 'animate-shake' : ''}`}>
-            {/* Large featured article */}
             {featuredArticle && (
               <div className="md:col-span-2">
                 <FeaturedNewsCard article={featuredArticle} size="large" onArticleClick={handleArticleClick} />
               </div>
             )}
-            
-            {/* Stacked smaller articles on the right */}
             <div className="space-y-4">
               {secondFeatured && (
                 <FeaturedNewsCard article={secondFeatured} size="small" onArticleClick={handleArticleClick} />
@@ -127,7 +139,7 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
           </div>
         )}
 
-        {/* Secondary Row - 3 equal columns */}
+        {/* Secondary Row */}
         {secondaryArticles.length > 0 && (
           <div className={isShaking ? 'animate-shake' : ''}>
             <SecondaryNewsRow articles={secondaryArticles} onArticleClick={handleArticleClick} />
@@ -150,14 +162,11 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
         )}
       </div>
 
-      {/* Sidebar - 1 column */}
+      {/* Sidebar */}
       <div className="space-y-8">
-        {/* Latest News */}
         <div className="glass-card p-4">
           <LatestNewsSidebar articles={sidebarArticles} onArticleClick={handleArticleClick} />
         </div>
-
-        {/* In Focus Section */}
         <div className="glass-card p-4">
           <FocusSection 
             selectedCategory={selectedCategory} 
@@ -165,7 +174,7 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
           />
         </div>
       </div>
-      {/* News Detail Dialog */}
+
       <NewsDetailDialog
         article={selectedArticle}
         open={dialogOpen}

@@ -73,11 +73,17 @@ export const getStockQuotes = async (symbols: string[]): Promise<Stock[]> => {
       .filter((s): s is Stock => s !== undefined);
   }
 
-  const data = await apiFetch<{ quotes: Stock[] }>(
+  const raw = await apiFetch<Array<{ symbol: string; name: string; price: number; change: number; change_percent: number }>>(
     API_CONFIG.STOCKS_BASE_URL,
     `/stocks/quotes?symbols=${symbols.join(',')}`,
   );
-  return data.quotes;
+  return raw.map((q) => ({
+    symbol: q.symbol,
+    name: q.name,
+    price: q.price,
+    change: q.change,
+    changePercent: q.change_percent,
+  }));
 };
 
 // ─── News ──────────────────────────────────────────────────

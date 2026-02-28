@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Stock } from '@/types/stock';
-import { popularStocks } from '@/data/mockData';
+// popularStocks import removed — price data now comes from the API
 import { syncWatchlist, getStockQuotes } from '@/services/stockApi';
 
 const STORAGE_KEY = 'stock-watchlist';
@@ -13,10 +13,23 @@ export const useWatchlist = () => {
     if (stored) {
       try {
         const symbols = JSON.parse(stored) as string[];
-        const stocks = symbols
-          .map(symbol => popularStocks.find(s => s.symbol === symbol))
-          .filter((s): s is Stock => s !== undefined);
-        setWatchlist(stocks);
+        if (symbols.length === 0) return;
+
+        // Set placeholder entries immediately so the UI shows symbols
+        const placeholders = symbols.map(symbol => ({ symbol, name: symbol }));
+        setWatchlist(placeholders);
+
+        // Fetch real price data from the API
+        getStockQuotes(symbols)
+          .then((quotes) => {
+            setWatchlist(prev =>
+              prev.map(s => {
+                const q = quotes.find(q => q.symbol === s.symbol);
+                return q ? { ...s, ...q } : s;
+              })
+            );
+          })
+          .catch(err => console.error('Failed to fetch quotes on load:', err));
       } catch (e) {
         console.error('Failed to parse watchlist:', e);
       }

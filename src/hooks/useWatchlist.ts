@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Stock } from '@/types/stock';
 import { popularStocks } from '@/data/mockData';
+import { syncWatchlist } from '@/services/stockApi';
 
 const STORAGE_KEY = 'stock-watchlist';
 
@@ -28,6 +29,10 @@ export const useWatchlist = () => {
     const newWatchlist = [...watchlist, stock];
     setWatchlist(newWatchlist);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newWatchlist.map(s => s.symbol)));
+
+    // Sync full watchlist to backend
+    syncWatchlist(newWatchlist.map(s => ({ symbol: s.symbol, name: s.name })))
+      .catch(err => console.error('Watchlist sync failed:', err));
   };
 
   const removeStock = (symbol: string) => {

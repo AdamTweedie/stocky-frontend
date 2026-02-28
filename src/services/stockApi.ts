@@ -118,3 +118,28 @@ export const getAggregatedNews = async (
   );
   return data.articles;
 };
+
+// ─── Watchlist Sync ────────────────────────────────────────
+
+/**
+ * Send the full watchlist to the backend whenever a stock is added.
+ * Payload: { stocks: Array<{ symbol: string; name: string }> }
+ */
+export const syncWatchlist = async (
+  stocks: Pick<Stock, 'symbol' | 'name'>[],
+): Promise<void> => {
+  if (USE_MOCK_DATA) {
+    console.log('[mock] syncWatchlist →', stocks);
+    return;
+  }
+
+  const res = await fetch(`${API_CONFIG.STOCKS_BASE_URL}/watchlist/sync`, {
+    method: 'POST',
+    headers: apiHeaders(),
+    body: JSON.stringify({ stocks }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Watchlist sync failed ${res.status}: ${res.statusText}`);
+  }
+};

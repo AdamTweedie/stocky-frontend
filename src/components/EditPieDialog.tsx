@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Stock } from '@/types/stock';
 import { useStockSearch } from '@/hooks/useStockSearch';
 
+
 interface EditPieDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

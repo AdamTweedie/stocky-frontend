@@ -6,7 +6,7 @@
  * When `true`:  All data comes from local mock generators (no network calls).
  * When `false`: Data is fetched from the configured API endpoints below.
  */
-export const USE_MOCK_DATA = true;
+export const USE_MOCK_DATA = false;
 
 /**
  * API configuration — only used when USE_MOCK_DATA is false.
@@ -14,10 +14,10 @@ export const USE_MOCK_DATA = true;
  */
 export const API_CONFIG = {
   /** Base URL for stock search / quote endpoints */
-  STOCKS_BASE_URL: 'https://api.example.com/v1',
+  STOCKS_BASE_URL: 'http://127.0.0.1:5000',
 
   /** Base URL for news endpoints */
-  NEWS_BASE_URL: 'https://api.example.com/v1',
+  NEWS_BASE_URL: 'http://127.0.0.1:5000',
 
   /** Optional API key header name (e.g. 'X-Api-Key', 'Authorization') */
   API_KEY_HEADER: 'X-Api-Key',

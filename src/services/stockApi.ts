@@ -71,21 +71,21 @@ export const getPopularStocks = async (): Promise<Stock[]> => {
  * Sends: GET /stocks/quotes?q=[{symbol,name,price,change,changePercent}]
  * Expects: a flat array back; returns the first match merged onto the input.
  */
-export const getStockQuote = async (stock: Stock): Promise<Stock> => {
+export const getStockQuote = async (stocks: Stock[]): Promise<Stock[]> => {
   if (USE_MOCK_DATA) {
-    const found = popularStocks.find((s) => s.symbol === stock.symbol);
-    return found ?? stock;
+    return stocks.map((s) => {
+      const found = popularStocks.find((ps) => ps.symbol === s.symbol);
+      return found ?? s;
+    });
   }
 
-  const payload = [
-    {
-      symbol: stock.symbol,
-      name: stock.name,
-      price: stock.price ?? 0,
-      change: stock.change ?? 0,
-      changePercent: stock.changePercent ?? 0,
-    },
-  ];
+  const payload = stocks.map((s) => ({
+    symbol: s.symbol,
+    name: s.name,
+    price: s.price ?? 0,
+    change: s.change ?? 0,
+    changePercent: s.changePercent ?? 0,
+  }));
 
   const res = await fetch(
     `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(payload))}`,
@@ -93,8 +93,7 @@ export const getStockQuote = async (stock: Stock): Promise<Stock> => {
   );
   if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
 
-  const raw: Stock[] = await res.json();
-  return raw.length > 0 ? { ...stock, ...raw[0] } : stock;
+  return res.json();
 };
 
 /**

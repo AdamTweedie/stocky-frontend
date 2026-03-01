@@ -44,10 +44,13 @@ export const useWatchlist = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newWatchlist.map(s => s.symbol)));
 
     // Fetch price data for the new stock
-    getStockQuote(stock)
-      .then((quoted) => {
+    getStockQuote([stock])
+      .then((quotes) => {
         setWatchlist(prev =>
-          prev.map(s => s.symbol === quoted.symbol ? quoted : s)
+          prev.map(s => {
+            const q = quotes.find(q => q.symbol === s.symbol);
+            return q ? { ...s, ...q } : s;
+          })
         );
       })
       .catch(err => console.error('Quote fetch failed:', err));

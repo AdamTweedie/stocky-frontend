@@ -71,6 +71,13 @@ export const getPopularStocks = async (): Promise<Stock[]> => {
  * Sends: GET /stocks/quotes?q=[{symbol,name,price,change,changePercent}]
  * Expects: a flat array back; returns the first match merged onto the input.
  */
+interface QuoteResponse {
+  symbol: string;
+  price: number;
+  change: number;
+  priceChange: number;
+}
+
 export const getStockQuote = async (stocks: Stock[]): Promise<Stock[]> => {
   if (USE_MOCK_DATA) {
     return stocks.map((s) => {
@@ -79,16 +86,10 @@ export const getStockQuote = async (stocks: Stock[]): Promise<Stock[]> => {
     });
   }
 
-  const payload = stocks.map((s) => ({
-    symbol: s.symbol.trim(),
-    name: s.name.trim(),
-    price: s.price ?? 0,
-    change: s.change ?? 0,
-    changePercent: s.changePercent ?? 0,
-  }));
+  const symbols = stocks.map((s) => s.symbol.trim());
 
   const res = await fetch(
-    `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(payload))}`,
+    `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(symbols))}`,
     { headers: apiHeaders() },
   );
   if (!res.ok) {
@@ -96,7 +97,13 @@ export const getStockQuote = async (stocks: Stock[]): Promise<Stock[]> => {
     throw new Error(`API error ${res.status}: ${res.statusText} - ${errorBody}`);
   }
 
-  return res.json();
+  const raw: QuoteResponse[] = await res.json();
+  return stocks.map((s) => {
+    const q = raw.find((r) => r.symbol === s.symbol);
+    return q
+      ? { ...s, price: q.price, change: q.change, changePercent: q.priceChange }
+      : s;
+  });
 };
 
 /**
@@ -109,22 +116,22 @@ export const getStockQuotes = async (symbols: string[]): Promise<Stock[]> => {
       .filter((s): s is Stock => s !== undefined);
   }
 
-  const payload = symbols.map((sym) => ({
-    symbol: sym,
-    name: sym,
-    price: 0,
-    change: 0,
-    changePercent: 0,
-  }));
+  const trimmed = symbols.map((s) => s.trim());
 
   const res = await fetch(
-    `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(payload))}`,
+    `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(trimmed))}`,
     { headers: apiHeaders() },
   );
   if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
 
-  const raw: Stock[] = await res.json();
-  return raw;
+  const raw: QuoteResponse[] = await res.json();
+  return raw.map((q) => ({
+    symbol: q.symbol,
+    name: q.symbol,
+    price: q.price,
+    change: q.change,
+    changePercent: q.priceChange,
+  }));
 };
 
 // ─── News ──────────────────────────────────────────────────

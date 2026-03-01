@@ -77,6 +77,8 @@ export const getStockQuotes = async (symbols: string[]): Promise<Stock[]> => {
     API_CONFIG.STOCKS_BASE_URL,
     `/stocks/quotes?symbols=${symbols.join(',')}`,
   );
+
+  console.log
   return raw.map((q) => ({
     symbol: q.symbol,
     name: q.name,

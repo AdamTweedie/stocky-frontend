@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Stock } from '@/types/stock';
 // popularStocks import removed — price data now comes from the API
-import { syncWatchlist, getStockQuotes } from '@/services/stockApi';
+import { syncWatchlist, getStockQuote, getStockQuotes } from '@/services/stockApi';
 
 const STORAGE_KEY = 'stock-watchlist';
 
@@ -44,13 +44,11 @@ export const useWatchlist = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newWatchlist.map(s => s.symbol)));
 
     // Fetch price data for the new stock
-    getStockQuotes([stock.symbol])
-      .then(([quote]) => {
-        if (quote) {
-          setWatchlist(prev =>
-            prev.map(s => s.symbol === quote.symbol ? { ...s, ...quote } : s)
-          );
-        }
+    getStockQuote(stock)
+      .then((quoted) => {
+        setWatchlist(prev =>
+          prev.map(s => s.symbol === quoted.symbol ? quoted : s)
+        );
       })
       .catch(err => console.error('Quote fetch failed:', err));
 

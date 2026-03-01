@@ -73,19 +73,23 @@ export const getStockQuotes = async (symbols: string[]): Promise<Stock[]> => {
       .filter((s): s is Stock => s !== undefined);
   }
 
-  const raw = await apiFetch<Array<{ symbol: string; name: string; price: number; change: number; change_percent: number }>>(
-    API_CONFIG.STOCKS_BASE_URL,
-    `/stocks/quotes?symbols=${symbols.join(',')}`,
-  );
-
-  console.log
-  return raw.map((q) => ({
-    symbol: q.symbol,
-    name: q.name,
-    price: q.price,
-    change: q.change,
-    changePercent: q.change_percent,
+  // Build query payload from the stocks we already know about
+  const payload = symbols.map((sym) => ({
+    symbol: sym,
+    name: sym,
+    price: 0,
+    change: 0,
+    changePercent: 0,
   }));
+
+  const res = await fetch(
+    `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(payload))}`,
+    { headers: apiHeaders() },
+  );
+  if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+
+  const raw: Stock[] = await res.json();
+  return raw;
 };
 
 // ─── News ──────────────────────────────────────────────────

@@ -80,8 +80,8 @@ export const getStockQuote = async (stocks: Stock[]): Promise<Stock[]> => {
   }
 
   const payload = stocks.map((s) => ({
-    symbol: s.symbol,
-    name: s.name,
+    symbol: s.symbol.trim(),
+    name: s.name.trim(),
     price: s.price ?? 0,
     change: s.change ?? 0,
     changePercent: s.changePercent ?? 0,
@@ -91,7 +91,10 @@ export const getStockQuote = async (stocks: Stock[]): Promise<Stock[]> => {
     `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(payload))}`,
     { headers: apiHeaders() },
   );
-  if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(`API error ${res.status}: ${res.statusText} - ${errorBody}`);
+  }
 
   return res.json();
 };

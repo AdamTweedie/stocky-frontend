@@ -66,6 +66,40 @@ export const getPopularStocks = async (): Promise<Stock[]> => {
 /**
  * Fetch real-time price data for a list of symbols.
  */
+/**
+ * Fetch a real-time price quote for a single stock.
+ * Sends: GET /stocks/quotes?q=[{symbol,name,price,change,changePercent}]
+ * Expects: a flat array back; returns the first match merged onto the input.
+ */
+export const getStockQuote = async (stock: Stock): Promise<Stock> => {
+  if (USE_MOCK_DATA) {
+    const found = popularStocks.find((s) => s.symbol === stock.symbol);
+    return found ?? stock;
+  }
+
+  const payload = [
+    {
+      symbol: stock.symbol,
+      name: stock.name,
+      price: stock.price ?? 0,
+      change: stock.change ?? 0,
+      changePercent: stock.changePercent ?? 0,
+    },
+  ];
+
+  const res = await fetch(
+    `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(payload))}`,
+    { headers: apiHeaders() },
+  );
+  if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+
+  const raw: Stock[] = await res.json();
+  return raw.length > 0 ? { ...stock, ...raw[0] } : stock;
+};
+
+/**
+ * Fetch real-time price data for a list of symbols (batch).
+ */
 export const getStockQuotes = async (symbols: string[]): Promise<Stock[]> => {
   if (USE_MOCK_DATA) {
     return symbols
@@ -73,7 +107,6 @@ export const getStockQuotes = async (symbols: string[]): Promise<Stock[]> => {
       .filter((s): s is Stock => s !== undefined);
   }
 
-  // Build query payload from the stocks we already know about
   const payload = symbols.map((sym) => ({
     symbol: sym,
     name: sym,

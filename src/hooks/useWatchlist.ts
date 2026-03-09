@@ -44,7 +44,7 @@ export const useWatchlist = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newWatchlist.map(s => s.symbol)));
 
     // Fetch price data for the new stock
-    getStockQuote([stock])
+    getStockQuote(stock.symbol.toString())
       .then((quotes) => {
         setWatchlist(prev =>
           prev.map(s => {

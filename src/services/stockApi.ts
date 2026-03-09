@@ -1,6 +1,7 @@
 import { Stock, NewsArticle } from '@/types/stock';
 import { USE_MOCK_DATA, API_CONFIG } from '@/config/features';
 import { popularStocks, generateMockNews } from '@/data/mockData';
+import { List } from 'postcss/lib/list';
 
 // ─── Helpers ───────────────────────────────────────────────
 
@@ -78,32 +79,13 @@ interface QuoteResponse {
   priceChange: number;
 }
 
-export const getStockQuote = async (stocks: Stock[]): Promise<Stock[]> => {
-  if (USE_MOCK_DATA) {
-    return stocks.map((s) => {
-      const found = popularStocks.find((ps) => ps.symbol === s.symbol);
-      return found ?? s;
-    });
-  }
-
-  const symbols = stocks.map((s) => s.symbol.trim());
-
-  const res = await fetch(
-    `${API_CONFIG.STOCKS_BASE_URL}/stocks/quotes?q=${encodeURIComponent(JSON.stringify(symbols))}`,
-    { headers: apiHeaders() },
+export const getStockQuote = async (query: string): Promise<Stock[]> => {
+  
+  const data = await apiFetch<{ results: Stock[] }>(
+    API_CONFIG.STOCKS_BASE_URL,
+    `/stocks/quotes?q=${encodeURIComponent(query)}`,
   );
-  if (!res.ok) {
-    const errorBody = await res.text();
-    throw new Error(`API error ${res.status}: ${res.statusText} - ${errorBody}`);
-  }
-
-  const raw: QuoteResponse[] = await res.json();
-  return stocks.map((s) => {
-    const q = raw.find((r) => r.symbol === s.symbol);
-    return q
-      ? { ...s, price: q.price, change: q.change, changePercent: q.priceChange }
-      : s;
-  });
+  return data.results;
 };
 
 /**

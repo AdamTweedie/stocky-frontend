@@ -6,7 +6,7 @@
  * When `true`:  All data comes from local mock generators (no network calls).
  * When `false`: Data is fetched from the configured API endpoints below.
  */
-export const USE_MOCK_DATA = false;
+export const USE_MOCK_DATA = true;
 
 /**
  * API configuration — only used when USE_MOCK_DATA is false.

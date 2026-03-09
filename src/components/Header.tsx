@@ -1,9 +1,13 @@
-import { TrendingUp, Sun, Moon } from 'lucide-react';
+import { TrendingUp, Sun, Moon, LogIn, LogOut, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
@@ -32,6 +36,23 @@ const Header = () => {
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Toggle theme</span>
             </Button>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                  <User className="w-4 h-4" />
+                  {user?.username}
+                </span>
+                <Button variant="ghost" size="sm" onClick={logout}>
+                  <LogOut className="w-4 h-4 mr-1" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
+                <LogIn className="w-4 h-4 mr-1" />
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </div>

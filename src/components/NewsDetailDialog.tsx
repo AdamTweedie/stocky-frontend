@@ -18,6 +18,32 @@ interface NewsDetailDialogProps {
 }
 
 const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps) => {
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleGetAiSummary = async () => {
+    if (!article) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const summary = await getArticleAiSummary(article.id, article.title, article.description);
+      setAiSummary(summary);
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : 'Failed to fetch AI summary');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleOpenChange = (value: boolean) => {
+    onOpenChange(value);
+    if (!value) {
+      setAiSummary(null);
+      setAiError(null);
+    }
+  };
+
   if (!article) return null;
 
   const getSentimentIcon = () => {

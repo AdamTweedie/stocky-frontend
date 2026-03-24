@@ -104,6 +104,7 @@ export const generateMockNews = (symbol: string): NewsArticle[] => {
     category,
     isExclusive: template.isExclusive,
     isLive: template.isLive,
+    imageUrl: stockImages[index % stockImages.length],
   }));
 };
 

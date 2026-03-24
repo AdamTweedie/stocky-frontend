@@ -91,13 +91,14 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
     }, 500);
   }, [refetch]);
 
-  // Split articles for layout
+  // Show more articles - split for layout
   const featuredArticle = shuffledMainNews[0];
   const secondFeatured = shuffledMainNews[1];
   const thirdFeatured = shuffledMainNews[2];
   const fourthFeatured = shuffledMainNews[3];
   const secondaryArticles = shuffledMainNews.slice(4, 7);
-  const sidebarArticles = allNews; // Sidebar always shows all news (unaffected by refresh)
+  const additionalFeatured = shuffledMainNews.slice(7, 13);
+  const sidebarArticles = allNews;
 
   if (watchlist.length === 0) {
     return (

@@ -20,4 +20,5 @@ export interface NewsArticle {
   category?: NewsCategory;
   isExclusive?: boolean;
   isLive?: boolean;
+  imageUrl?: string;
 }

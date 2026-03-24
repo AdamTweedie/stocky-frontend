@@ -179,3 +179,43 @@ export const syncWatchlist = async (
     throw new Error(`Watchlist sync failed ${res.status}: ${res.statusText}`);
   }
 };
+
+// ─── AI Summaries ──────────────────────────────────────────
+
+/**
+ * Get an AI summary for a single news article.
+ */
+export const getArticleAiSummary = async (articleId: string, title: string, description: string): Promise<string> => {
+  if (USE_MOCK_DATA) {
+    return `AI Summary: This article discusses "${title}". Key takeaways include market implications and potential investor impact. The sentiment analysis suggests monitoring this development closely for trading opportunities.`;
+  }
+
+  const res = await fetch(`${API_CONFIG.STOCKS_BASE_URL}/ai/article-summary`, {
+    method: 'POST',
+    headers: apiHeaders(),
+    body: JSON.stringify({ article_id: articleId, title, description }),
+  });
+
+  if (!res.ok) throw new Error(`AI summary failed ${res.status}: ${res.statusText}`);
+  const data = await res.json();
+  return data.summary;
+};
+
+/**
+ * Get an AI summary of all recent news for a specific stock symbol.
+ */
+export const getStockAiSummary = async (symbol: string): Promise<string> => {
+  if (USE_MOCK_DATA) {
+    return `AI Summary for ${symbol}: Recent developments show mixed signals. The stock has seen increased institutional interest amid sector-wide shifts. Key catalysts include upcoming earnings reports and regulatory changes. Overall market sentiment remains cautiously optimistic with analysts maintaining a moderate outlook.`;
+  }
+
+  const res = await fetch(`${API_CONFIG.STOCKS_BASE_URL}/ai/stock-summary`, {
+    method: 'POST',
+    headers: apiHeaders(),
+    body: JSON.stringify({ symbol }),
+  });
+
+  if (!res.ok) throw new Error(`AI summary failed ${res.status}: ${res.statusText}`);
+  const data = await res.json();
+  return data.summary;
+};

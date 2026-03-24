@@ -1,6 +1,8 @@
-import { ExternalLink, TrendingUp, TrendingDown, Minus, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { ExternalLink, TrendingUp, TrendingDown, Minus, Clock, Bot, Loader2, Sparkles } from 'lucide-react';
 import { NewsArticle } from '@/types/stock';
 import { formatDistanceToNow } from 'date-fns';
+import { getArticleAiSummary } from '@/services/stockApi';
 import {
   Dialog,
   DialogContent,
@@ -16,6 +18,32 @@ interface NewsDetailDialogProps {
 }
 
 const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps) => {
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleGetAiSummary = async () => {
+    if (!article) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const summary = await getArticleAiSummary(article.id, article.title, article.description);
+      setAiSummary(summary);
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : 'Failed to fetch AI summary');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleOpenChange = (value: boolean) => {
+    onOpenChange(value);
+    if (!value) {
+      setAiSummary(null);
+      setAiError(null);
+    }
+  };
+
   if (!article) return null;
 
   const getSentimentIcon = () => {
@@ -52,7 +80,7 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-2xl glass-card border-primary/20">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
@@ -107,6 +135,43 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
               This article covers recent developments regarding {article.stockSymbol} and its impact on the {article.category?.toLowerCase() || 'market'} sector. 
               Analysts are closely monitoring the situation as it may affect investor sentiment and trading activity in the coming sessions.
             </p>
+          </div>
+
+          {/* AI Summary Section */}
+          <div className="space-y-3">
+            {!aiSummary && !aiLoading && (
+              <Button
+                variant="outline"
+                onClick={handleGetAiSummary}
+                className="w-full gap-2 border-primary/30 hover:border-primary hover:bg-primary/10"
+              >
+                <Bot className="w-4 h-4" />
+                Get AI Summary
+              </Button>
+            )}
+
+            {aiLoading && (
+              <div className="flex items-center justify-center py-4 gap-2 rounded-lg bg-primary/5 border border-primary/20">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span className="text-sm text-muted-foreground">Generating AI summary…</span>
+              </div>
+            )}
+
+            {aiError && (
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-destructive text-sm">
+                {aiError}
+              </div>
+            )}
+
+            {aiSummary && (
+              <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  AI Summary
+                </div>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{aiSummary}</p>
+              </div>
+            )}
           </div>
 
           {/* Read full article button */}

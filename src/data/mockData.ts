@@ -27,6 +27,14 @@ export const generateMockNews = (symbol: string): NewsArticle[] => {
   const companyName = stockData?.name || symbol;
   const category = categoryMap[symbol] || 'Tech';
   
+  const stockImages = [
+    'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80',
+    'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&q=80',
+    'https://images.unsplash.com/photo-1468254095679-bbcba94a7066?w=800&q=80',
+    'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&q=80',
+    'https://images.unsplash.com/photo-1504607798333-52a30db54a5d?w=800&q=80',
+  ];
+
   const newsTemplates = [
     {
       title: `${companyName} Reports Strong Q4 Earnings, Beats Analyst Expectations`,
@@ -53,6 +61,31 @@ export const generateMockNews = (symbol: string): NewsArticle[] => {
     {
       title: `${companyName} Announces Strategic Partnership with Tech Giant`,
       description: `In a move to expand its market reach, ${companyName} has entered into a multi-year partnership agreement that could boost revenue.`,
+      sentiment: 'positive' as const,
+    },
+    {
+      title: `${companyName} Expands Into New Markets with Ambitious Growth Plan`,
+      description: `${companyName} unveiled a comprehensive strategy to enter emerging markets, with plans to invest billions in infrastructure and talent acquisition over the next five years.`,
+      sentiment: 'positive' as const,
+    },
+    {
+      title: `Institutional Investors Increase Holdings in ${symbol}`,
+      description: `Major hedge funds and institutional investors have significantly increased their positions in ${symbol}, signaling confidence in the company's long-term growth trajectory.`,
+      sentiment: 'positive' as const,
+    },
+    {
+      title: `${companyName} CEO Addresses Shareholder Concerns at Annual Meeting`,
+      description: `The annual shareholder meeting highlighted key strategic priorities including AI integration, sustainability initiatives, and plans to return capital to shareholders through buybacks.`,
+      sentiment: 'neutral' as const,
+    },
+    {
+      title: `Supply Chain Challenges Could Impact ${companyName}'s Next Quarter`,
+      description: `Industry analysts warn that ongoing supply chain disruptions may affect ${companyName}'s ability to meet demand, potentially leading to a softer outlook for the upcoming quarter.`,
+      sentiment: 'negative' as const,
+    },
+    {
+      title: `${symbol} Gains Momentum as Sector Rotation Favors Growth Stocks`,
+      description: `A broader shift in investor sentiment toward growth-oriented equities has benefited ${symbol}, with the stock outperforming its sector peers over the past month.`,
       sentiment: 'positive' as const,
     },
   ];

@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { Sparkles, RefreshCw } from 'lucide-react';
+import { Sparkles, RefreshCw, Bot } from 'lucide-react';
 import { Stock, NewsArticle, NewsCategory } from '@/types/stock';
 import { useStockNews } from '@/hooks/useStockNews';
 import LatestNewsSidebar from './LatestNewsSidebar';
@@ -7,6 +7,7 @@ import FocusSection from './FocusSection';
 import FeaturedNewsCard from './FeaturedNewsCard';
 import SecondaryNewsRow from './SecondaryNewsRow';
 import NewsDetailDialog from './NewsDetailDialog';
+import AiStockSummaryDialog from './AiStockSummaryDialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -20,6 +21,7 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   const [isShaking, setIsShaking] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [aiSummaryOpen, setAiSummaryOpen] = useState(false);
 
   const symbols = useMemo(() => watchlist.map((s) => s.symbol), [watchlist]);
   const { data: allNews = [], isLoading, refetch } = useStockNews(symbols);
@@ -108,7 +110,16 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
       {/* Main Content Area - 3 columns */}
       <div className="lg:col-span-3 space-y-6">
         {/* Refresh Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAiSummaryOpen(true)}
+            className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
+          >
+            <Bot className="w-4 h-4" />
+            AI Summary
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -179,6 +190,12 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
         article={selectedArticle}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+      />
+
+      <AiStockSummaryDialog
+        open={aiSummaryOpen}
+        onOpenChange={setAiSummaryOpen}
+        stocks={watchlist}
       />
     </div>
   );

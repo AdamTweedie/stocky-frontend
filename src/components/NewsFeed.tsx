@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { Sparkles, RefreshCw, Bot } from 'lucide-react';
+import { Sparkles, RefreshCw, Bot, ArrowUpDown } from 'lucide-react';
 import { Stock, NewsArticle, NewsCategory } from '@/types/stock';
 import { useStockNews } from '@/hooks/useStockNews';
 import LatestNewsSidebar from './LatestNewsSidebar';

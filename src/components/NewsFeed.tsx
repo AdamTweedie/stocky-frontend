@@ -91,13 +91,14 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
     }, 500);
   }, [refetch]);
 
-  // Split articles for layout
+  // Show more articles - split for layout
   const featuredArticle = shuffledMainNews[0];
   const secondFeatured = shuffledMainNews[1];
   const thirdFeatured = shuffledMainNews[2];
   const fourthFeatured = shuffledMainNews[3];
   const secondaryArticles = shuffledMainNews.slice(4, 7);
-  const sidebarArticles = allNews; // Sidebar always shows all news (unaffected by refresh)
+  const additionalFeatured = shuffledMainNews.slice(7, 13);
+  const sidebarArticles = allNews;
 
   if (watchlist.length === 0) {
     return (
@@ -138,10 +139,9 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      {/* Main Content Area - 3 columns */}
-      <div className="lg:col-span-3 space-y-6">
-        {/* Controls */}
+    <div className="glass-card border border-border/50 rounded-xl overflow-hidden">
+      {/* Controls - sticky at top */}
+      <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-md border-b border-border/50 px-6 py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <Select value={sortBy} onValueChange={setSortBy}>
@@ -203,59 +203,91 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
             </Button>
           </div>
         </div>
+      </div>
 
-        {/* Featured Grid - Asymmetric layout */}
-        {shuffledMainNews.length > 0 && (
-          <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${isShaking ? 'animate-shake' : ''}`}>
-            {featuredArticle && (
-              <div className="md:col-span-2">
-                <FeaturedNewsCard article={featuredArticle} size="large" onArticleClick={handleArticleClick} />
+      {/* Scrollable news content */}
+      <div className="max-h-[85vh] overflow-y-auto px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content Area - 3 columns */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Featured Grid - Asymmetric layout */}
+            {shuffledMainNews.length > 0 && (
+              <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${isShaking ? 'animate-shake' : ''}`}>
+                {featuredArticle && (
+                  <div className="md:col-span-2">
+                    <FeaturedNewsCard article={featuredArticle} size="large" onArticleClick={handleArticleClick} />
+                  </div>
+                )}
+                <div className="space-y-4">
+                  {secondFeatured && (
+                    <FeaturedNewsCard article={secondFeatured} size="small" onArticleClick={handleArticleClick} />
+                  )}
+                  {thirdFeatured && (
+                    <FeaturedNewsCard article={thirdFeatured} size="small" onArticleClick={handleArticleClick} />
+                  )}
+                </div>
               </div>
             )}
-            <div className="space-y-4">
-              {secondFeatured && (
-                <FeaturedNewsCard article={secondFeatured} size="small" onArticleClick={handleArticleClick} />
-              )}
-              {thirdFeatured && (
-                <FeaturedNewsCard article={thirdFeatured} size="small" onArticleClick={handleArticleClick} />
-              )}
-            </div>
-          </div>
-        )}
 
-        {/* Secondary Row */}
-        {secondaryArticles.length > 0 && (
-          <div className={isShaking ? 'animate-shake' : ''}>
-            <SecondaryNewsRow articles={secondaryArticles} onArticleClick={handleArticleClick} />
-          </div>
-        )}
+            {/* Secondary Row */}
+            {secondaryArticles.length > 0 && (
+              <div className={isShaking ? 'animate-shake' : ''}>
+                <SecondaryNewsRow articles={secondaryArticles} onArticleClick={handleArticleClick} />
+              </div>
+            )}
 
-        {/* Third featured section */}
-        {fourthFeatured && shuffledMainNews.length > 4 && (
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border/30 pt-6 ${isShaking ? 'animate-shake' : ''}`}>
-            <FeaturedNewsCard article={fourthFeatured} size="medium" onArticleClick={handleArticleClick} />
-            {shuffledMainNews[5] && (
-              <div className="space-y-4">
-                <FeaturedNewsCard article={shuffledMainNews[5]} size="small" onArticleClick={handleArticleClick} />
-                {shuffledMainNews[6] && (
-                  <FeaturedNewsCard article={shuffledMainNews[6]} size="small" onArticleClick={handleArticleClick} />
+            {/* Third featured section */}
+            {fourthFeatured && shuffledMainNews.length > 4 && (
+              <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border/30 pt-6 ${isShaking ? 'animate-shake' : ''}`}>
+                <FeaturedNewsCard article={fourthFeatured} size="medium" onArticleClick={handleArticleClick} />
+                {shuffledMainNews[5] && (
+                  <div className="space-y-4">
+                    <FeaturedNewsCard article={shuffledMainNews[5]} size="small" onArticleClick={handleArticleClick} />
+                    {shuffledMainNews[6] && (
+                      <FeaturedNewsCard article={shuffledMainNews[6]} size="small" onArticleClick={handleArticleClick} />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Additional articles section */}
+            {additionalFeatured.length > 0 && (
+              <div className={`border-t border-border/30 pt-6 space-y-6 ${isShaking ? 'animate-shake' : ''}`}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {additionalFeatured[0] && (
+                    <FeaturedNewsCard article={additionalFeatured[0]} size="medium" onArticleClick={handleArticleClick} />
+                  )}
+                  {additionalFeatured[1] && (
+                    <FeaturedNewsCard article={additionalFeatured[1]} size="medium" onArticleClick={handleArticleClick} />
+                  )}
+                  {additionalFeatured[2] && (
+                    <FeaturedNewsCard article={additionalFeatured[2]} size="medium" onArticleClick={handleArticleClick} />
+                  )}
+                </div>
+                {additionalFeatured.length > 3 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {additionalFeatured.slice(3).map((article) => (
+                      <FeaturedNewsCard key={article.id} article={article} size="medium" onArticleClick={handleArticleClick} />
+                    ))}
+                  </div>
                 )}
               </div>
             )}
           </div>
-        )}
-      </div>
 
-      {/* Sidebar */}
-      <div className="space-y-8">
-        <div className="glass-card p-4">
-          <LatestNewsSidebar articles={sidebarArticles} onArticleClick={handleArticleClick} />
-        </div>
-        <div className="glass-card p-4">
-          <FocusSection 
-            selectedCategory={selectedCategory} 
-            onCategorySelect={setSelectedCategory}
-          />
+          {/* Sidebar */}
+          <div className="space-y-8">
+            <div className="glass-card p-4">
+              <LatestNewsSidebar articles={sidebarArticles} onArticleClick={handleArticleClick} />
+            </div>
+            <div className="glass-card p-4">
+              <FocusSection 
+                selectedCategory={selectedCategory} 
+                onCategorySelect={setSelectedCategory}
+              />
+            </div>
+          </div>
         </div>
       </div>
 

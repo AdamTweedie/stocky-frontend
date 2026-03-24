@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { Sparkles, RefreshCw, Bot } from 'lucide-react';
+import { Sparkles, RefreshCw, Bot, ArrowUpDown } from 'lucide-react';
 import { Stock, NewsArticle, NewsCategory } from '@/types/stock';
 import { useStockNews } from '@/hooks/useStockNews';
 import LatestNewsSidebar from './LatestNewsSidebar';
@@ -10,6 +10,13 @@ import NewsDetailDialog from './NewsDetailDialog';
 import AiStockSummaryDialog from './AiStockSummaryDialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface NewsFeedProps {
   watchlist: Stock[];
@@ -22,6 +29,9 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [aiSummaryOpen, setAiSummaryOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<string>('date');
+  const [filterStock, setFilterStock] = useState<string>('all');
+  const [filterSentiment, setFilterSentiment] = useState<string>('all');
 
   const symbols = useMemo(() => watchlist.map((s) => s.symbol), [watchlist]);
   const { data: allNews = [], isLoading, refetch } = useStockNews(symbols);
@@ -31,14 +41,36 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
     setDialogOpen(true);
   }, []);
 
-  // Shuffled news for main content (affected by refresh)
+  // Filtered and sorted news
   const shuffledMainNews = useMemo(() => {
-    const filtered = selectedCategory 
+    let filtered = selectedCategory 
       ? allNews.filter((article) => article.category === selectedCategory)
       : [...allNews];
-    
-    // Shuffle the array based on shuffleKey
-    if (shuffleKey > 0) {
+
+    // Filter by stock
+    if (filterStock !== 'all') {
+      filtered = filtered.filter((a) => a.stockSymbol === filterStock);
+    }
+
+    // Filter by sentiment
+    if (filterSentiment !== 'all') {
+      filtered = filtered.filter((a) => a.sentiment === filterSentiment);
+    }
+
+    // Sort
+    if (sortBy === 'date') {
+      filtered.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    } else if (sortBy === 'stock') {
+      filtered.sort((a, b) => a.stockSymbol.localeCompare(b.stockSymbol));
+    } else if (sortBy === 'sentiment') {
+      const order = { positive: 0, neutral: 1, negative: 2 };
+      filtered.sort((a, b) => (order[a.sentiment ?? 'neutral'] ?? 1) - (order[b.sentiment ?? 'neutral'] ?? 1));
+    } else if (sortBy === 'industry') {
+      filtered.sort((a, b) => (a.category ?? '').localeCompare(b.category ?? ''));
+    }
+
+    // Shuffle on top if requested
+    if (shuffleKey > 0 && sortBy === 'date') {
       for (let i = filtered.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
@@ -46,7 +78,7 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
     }
     
     return filtered;
-  }, [allNews, selectedCategory, shuffleKey]);
+  }, [allNews, selectedCategory, shuffleKey, sortBy, filterStock, filterSentiment]);
 
   const handleRefresh = useCallback(() => {
     setIsShaking(true);
@@ -109,26 +141,67 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* Main Content Area - 3 columns */}
       <div className="lg:col-span-3 space-y-6">
-        {/* Refresh Button */}
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAiSummaryOpen(true)}
-            className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
-          >
-            <Bot className="w-4 h-4" />
-            AI Summary
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
-          >
-            <RefreshCw className={`w-4 h-4 ${isShaking ? 'animate-spin' : ''}`} />
-            Refresh News
-          </Button>
+        {/* Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[130px] h-9 text-xs border-border/50">
+                <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="stock">Stock</SelectItem>
+                <SelectItem value="sentiment">Sentiment</SelectItem>
+                <SelectItem value="industry">Industry</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterStock} onValueChange={setFilterStock}>
+              <SelectTrigger className="w-[130px] h-9 text-xs border-border/50">
+                <SelectValue placeholder="All Stocks" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stocks</SelectItem>
+                {watchlist.map((s) => (
+                  <SelectItem key={s.symbol} value={s.symbol}>{s.symbol}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={filterSentiment} onValueChange={setFilterSentiment}>
+              <SelectTrigger className="w-[140px] h-9 text-xs border-border/50">
+                <SelectValue placeholder="All Sentiment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sentiment</SelectItem>
+                <SelectItem value="positive">Positive</SelectItem>
+                <SelectItem value="neutral">Neutral</SelectItem>
+                <SelectItem value="negative">Negative</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAiSummaryOpen(true)}
+              className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
+            >
+              <Bot className="w-4 h-4" />
+              AI Summary
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
+            >
+              <RefreshCw className={`w-4 h-4 ${isShaking ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Featured Grid - Asymmetric layout */}

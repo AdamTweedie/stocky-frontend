@@ -1,6 +1,8 @@
-import { ExternalLink, TrendingUp, TrendingDown, Minus, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { ExternalLink, TrendingUp, TrendingDown, Minus, Clock, Bot, Loader2, Sparkles } from 'lucide-react';
 import { NewsArticle } from '@/types/stock';
 import { formatDistanceToNow } from 'date-fns';
+import { getArticleAiSummary } from '@/services/stockApi';
 import {
   Dialog,
   DialogContent,

@@ -139,77 +139,77 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   }
 
   return (
-    <div className="glass-card border border-border/50 rounded-xl overflow-hidden">
-      {/* Controls - sticky at top */}
-      <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-md border-b border-border/50 px-6 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[130px] h-9 text-xs border-border/50">
-                <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 shrink-0" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="stock">Stock</SelectItem>
-                <SelectItem value="sentiment">Sentiment</SelectItem>
-                <SelectItem value="industry">Industry</SelectItem>
-              </SelectContent>
-            </Select>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Main News Container */}
+        <div className="lg:col-span-3 glass-card border border-border/50 rounded-xl overflow-hidden">
+          {/* Controls - sticky at top */}
+          <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-md border-b border-border/50 px-6 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-[130px] h-9 text-xs border-border/50">
+                    <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="stock">Stock</SelectItem>
+                    <SelectItem value="sentiment">Sentiment</SelectItem>
+                    <SelectItem value="industry">Industry</SelectItem>
+                  </SelectContent>
+                </Select>
 
-            <Select value={filterStock} onValueChange={setFilterStock}>
-              <SelectTrigger className="w-[130px] h-9 text-xs border-border/50">
-                <SelectValue placeholder="All Stocks" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stocks</SelectItem>
-                {watchlist.map((s) => (
-                  <SelectItem key={s.symbol} value={s.symbol}>{s.symbol}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <Select value={filterStock} onValueChange={setFilterStock}>
+                  <SelectTrigger className="w-[130px] h-9 text-xs border-border/50">
+                    <SelectValue placeholder="All Stocks" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Stocks</SelectItem>
+                    {watchlist.map((s) => (
+                      <SelectItem key={s.symbol} value={s.symbol}>{s.symbol}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-            <Select value={filterSentiment} onValueChange={setFilterSentiment}>
-              <SelectTrigger className="w-[140px] h-9 text-xs border-border/50">
-                <SelectValue placeholder="All Sentiment" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sentiment</SelectItem>
-                <SelectItem value="positive">Positive</SelectItem>
-                <SelectItem value="neutral">Neutral</SelectItem>
-                <SelectItem value="negative">Negative</SelectItem>
-              </SelectContent>
-            </Select>
+                <Select value={filterSentiment} onValueChange={setFilterSentiment}>
+                  <SelectTrigger className="w-[140px] h-9 text-xs border-border/50">
+                    <SelectValue placeholder="All Sentiment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sentiment</SelectItem>
+                    <SelectItem value="positive">Positive</SelectItem>
+                    <SelectItem value="neutral">Neutral</SelectItem>
+                    <SelectItem value="negative">Negative</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAiSummaryOpen(true)}
+                  className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
+                >
+                  <Bot className="w-4 h-4" />
+                  AI Summary
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefresh}
+                  className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isShaking ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+            </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAiSummaryOpen(true)}
-              className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
-            >
-              <Bot className="w-4 h-4" />
-              AI Summary
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              className="gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all"
-            >
-              <RefreshCw className={`w-4 h-4 ${isShaking ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Content area */}
-      <div className="px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Main Content Area - scrollable, hidden scrollbar */}
-          <div className="lg:col-span-3 max-h-[80vh] overflow-y-auto scrollbar-hide space-y-6">
+          {/* Scrollable news content */}
+          <div className="max-h-[80vh] overflow-y-auto scrollbar-hide px-6 py-6 space-y-6">
             {/* Featured Grid - Asymmetric layout */}
             {shuffledMainNews.length > 0 && (
               <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${isShaking ? 'animate-shake' : ''}`}>
@@ -275,18 +275,18 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
               </div>
             )}
           </div>
+        </div>
 
-          {/* Sidebar - outside scroll */}
-          <div className="space-y-8">
-            <div className="glass-card p-4">
-              <LatestNewsSidebar articles={sidebarArticles} onArticleClick={handleArticleClick} />
-            </div>
-            <div className="glass-card p-4">
-              <FocusSection 
-                selectedCategory={selectedCategory} 
-                onCategorySelect={setSelectedCategory}
-              />
-            </div>
+        {/* Sidebar - independent, aligned with top of news container */}
+        <div className="space-y-8">
+          <div className="glass-card p-4">
+            <LatestNewsSidebar articles={sidebarArticles} onArticleClick={handleArticleClick} />
+          </div>
+          <div className="glass-card p-4">
+            <FocusSection 
+              selectedCategory={selectedCategory} 
+              onCategorySelect={setSelectedCategory}
+            />
           </div>
         </div>
       </div>

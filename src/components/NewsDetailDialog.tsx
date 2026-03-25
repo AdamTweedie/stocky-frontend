@@ -3,6 +3,7 @@ import { ExternalLink, TrendingUp, TrendingDown, Minus, Clock, Bot, Loader2, Spa
 import { NewsArticle } from '@/types/stock';
 import { formatDistanceToNow } from 'date-fns';
 import { getArticleAiSummary } from '@/services/stockApi';
+import StreamingText from './StreamingText';
 import {
   Dialog,
   DialogContent,
@@ -169,7 +170,9 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
                   <Sparkles className="w-3.5 h-3.5" />
                   AI Summary
                 </div>
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{aiSummary}</p>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                  <StreamingText text={aiSummary} speed={30} />
+                </p>
               </div>
             )}
           </div>

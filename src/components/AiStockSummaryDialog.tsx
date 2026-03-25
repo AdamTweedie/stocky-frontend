@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Bot, Loader2, Sparkles } from 'lucide-react';
 import { Stock } from '@/types/stock';
 import { getStockAiSummary } from '@/services/stockApi';
+import StreamingText from './StreamingText';
 import {
   Dialog,
   DialogContent,
@@ -98,7 +99,9 @@ const AiStockSummaryDialog = ({ open, onOpenChange, stocks }: AiStockSummaryDial
                 <Sparkles className="w-4 h-4" />
                 AI Summary — {selectedSymbol}
               </div>
-              <p className="text-foreground leading-relaxed whitespace-pre-line">{summary}</p>
+              <p className="text-foreground leading-relaxed whitespace-pre-line">
+                <StreamingText text={summary} speed={30} />
+              </p>
             </div>
           )}
 

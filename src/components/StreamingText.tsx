@@ -6,9 +6,10 @@ interface StreamingTextProps {
   className?: string;
 }
 
-const StreamingText = ({ text, speed = 30, className = '' }: StreamingTextProps) => {
+const StreamingText = ({ text, speed = 60, className = '' }: StreamingTextProps) => {
   const [visibleCount, setVisibleCount] = useState(0);
   const words = text.split(' ');
+  const isComplete = visibleCount >= words.length;
 
   useEffect(() => {
     setVisibleCount(0);
@@ -39,6 +40,9 @@ const StreamingText = ({ text, speed = 30, className = '' }: StreamingTextProps)
           {word}{i < words.length - 1 ? ' ' : ''}
         </span>
       ))}
+      {!isComplete && (
+        <span className="inline-block w-[2px] h-[1em] bg-primary align-middle animate-pulse ml-0.5" />
+      )}
     </span>
   );
 };

@@ -205,11 +205,11 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
         </div>
       </div>
 
-      {/* Scrollable news content */}
-      <div className="max-h-[85vh] overflow-y-auto px-6 py-6">
+      {/* Content area */}
+      <div className="px-6 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Main Content Area - 3 columns */}
-          <div className="lg:col-span-3 space-y-6">
+          {/* Main Content Area - scrollable, hidden scrollbar */}
+          <div className="lg:col-span-3 max-h-[80vh] overflow-y-auto scrollbar-hide space-y-6">
             {/* Featured Grid - Asymmetric layout */}
             {shuffledMainNews.length > 0 && (
               <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${isShaking ? 'animate-shake' : ''}`}>
@@ -276,7 +276,7 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
             )}
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar - outside scroll */}
           <div className="space-y-8">
             <div className="glass-card p-4">
               <LatestNewsSidebar articles={sidebarArticles} onArticleClick={handleArticleClick} />

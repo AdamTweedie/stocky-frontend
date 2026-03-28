@@ -1,10 +1,18 @@
-import { NewsCategory } from '@/types/stock';
-import { focusCategories } from '@/data/mockData';
-
 interface FocusSectionProps {
-  selectedCategory: NewsCategory | null;
-  onCategorySelect: (category: NewsCategory | null) => void;
+  selectedCategory: string | null;
+  onCategorySelect: (category: string | null) => void;
 }
+
+const FOCUS_CATEGORIES = [
+  'bloomberg.com',
+  'reuters.com',
+  'wsj.com',
+  'ft.com',
+  'cnbc.com',
+  'marketwatch.com',
+  'seekingalpha.com',
+  'barrons.com',
+];
 
 const FocusSection = ({ selectedCategory, onCategorySelect }: FocusSectionProps) => {
   return (
@@ -12,7 +20,7 @@ const FocusSection = ({ selectedCategory, onCategorySelect }: FocusSectionProps)
       <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">In Focus</h3>
       
       <div className="flex flex-wrap gap-2">
-        {focusCategories.map((category) => (
+        {FOCUS_CATEGORIES.map((category) => (
           <button
             key={category}
             onClick={() => onCategorySelect(selectedCategory === category ? null : category)}

@@ -17,7 +17,7 @@ const LatestNewsSidebar = ({ articles, onArticleClick }: LatestNewsSidebarProps)
     searchQuery.trim() === '' ||
     article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     article.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.stockSymbol.toLowerCase().includes(searchQuery.toLowerCase())
+    article.short_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Show only the most recent 8 articles
@@ -50,7 +50,7 @@ const LatestNewsSidebar = ({ articles, onArticleClick }: LatestNewsSidebarProps)
               className="flex gap-3 py-3 group hover:bg-accent/30 -mx-2 px-2 rounded transition-colors w-full text-left"
             >
               <span className="text-xs text-primary font-medium shrink-0 w-12">
-                {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: false })}
+                {formatDistanceToNow(new Date(article.publish_time), { addSuffix: false })}
               </span>
               <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                 {article.title}

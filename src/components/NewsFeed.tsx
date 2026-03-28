@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from 'react';
 import { Sparkles, RefreshCw, Bot, ArrowUpDown } from 'lucide-react';
-import { Stock, NewsArticle, NewsCategory } from '@/types/stock';
+import { Stock, NewsArticle} from '@/types/stock';
 import { useStockNews } from '@/hooks/useStockNews';
 import LatestNewsSidebar from './LatestNewsSidebar';
 import FocusSection from './FocusSection';
@@ -23,7 +23,7 @@ interface NewsFeedProps {
 }
 
 const NewsFeed = ({ watchlist }: NewsFeedProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<NewsCategory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [shuffleKey, setShuffleKey] = useState(0);
   const [isShaking, setIsShaking] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
@@ -44,29 +44,35 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
   // Filtered and sorted news
   const shuffledMainNews = useMemo(() => {
     let filtered = selectedCategory 
-      ? allNews.filter((article) => article.category === selectedCategory)
+      ? allNews.filter((article) => article.source === selectedCategory)
       : [...allNews];
 
     // Filter by stock
     if (filterStock !== 'all') {
-      filtered = filtered.filter((a) => a.stockSymbol === filterStock);
+      filtered = filtered.filter((a) => a.short_name === filterStock);
     }
 
     // Filter by sentiment
     if (filterSentiment !== 'all') {
-      filtered = filtered.filter((a) => a.sentiment === filterSentiment);
+      filtered = filtered.filter((a) => {
+        if (a.sentiment === null) return filterSentiment === 'neutral';
+        if (filterSentiment === 'positive') return a.sentiment > 0.2;
+        if (filterSentiment === 'negative') return a.sentiment < -0.2;
+        if (filterSentiment === 'neutral') return a.sentiment >= -0.2 && a.sentiment <= 0.2;
+        return true;
+      });
     }
 
     // Sort
     if (sortBy === 'date') {
-      filtered.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+      filtered.sort((a, b) => new Date(b.publish_time).getTime() - new Date(a.publish_time).getTime());
     } else if (sortBy === 'stock') {
-      filtered.sort((a, b) => a.stockSymbol.localeCompare(b.stockSymbol));
+      filtered.sort((a, b) => a.short_name.localeCompare(b.short_name));
     } else if (sortBy === 'sentiment') {
       const order = { positive: 0, neutral: 1, negative: 2 };
       filtered.sort((a, b) => (order[a.sentiment ?? 'neutral'] ?? 1) - (order[b.sentiment ?? 'neutral'] ?? 1));
     } else if (sortBy === 'industry') {
-      filtered.sort((a, b) => (a.category ?? '').localeCompare(b.category ?? ''));
+      filtered.sort((a, b) => (a.source ?? '').localeCompare(b.source ?? ''));
     }
 
     // Shuffle on top if requested

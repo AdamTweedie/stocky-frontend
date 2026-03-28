@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
+  const [email, setEmail] = useState('')
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -41,7 +42,7 @@ const Auth = () => {
       return;
     }
     try {
-      await signup(username, password);
+      await signup(email, username, password);
       toast({ title: 'Account created!' });
       navigate('/');
     } catch (err: any) {

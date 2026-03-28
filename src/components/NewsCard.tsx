@@ -7,26 +7,30 @@ interface NewsCardProps {
   index: number;
 }
 
+
 const NewsCard = ({ article, index }: NewsCardProps) => {
+  const getSentimentType = () => {
+    if (article.sentiment === null) return 'neutral';
+    if (article.sentiment > 0.2) return 'positive';
+    if (article.sentiment < -0.2) return 'negative';
+    return 'neutral';
+  };
+
+  const sentimentType = getSentimentType();
+
   const getSentimentIcon = () => {
-    switch (article.sentiment) {
-      case 'positive':
-        return <TrendingUp className="w-4 h-4 text-success" />;
-      case 'negative':
-        return <TrendingDown className="w-4 h-4 text-destructive" />;
-      default:
-        return <Minus className="w-4 h-4 text-muted-foreground" />;
+    switch (sentimentType) {
+      case 'positive': return <TrendingUp className="w-4 h-4 text-success" />;
+      case 'negative': return <TrendingDown className="w-4 h-4 text-destructive" />;
+      default:         return <Minus className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
   const getSentimentBg = () => {
-    switch (article.sentiment) {
-      case 'positive':
-        return 'bg-success/10 border-success/20';
-      case 'negative':
-        return 'bg-destructive/10 border-destructive/20';
-      default:
-        return 'bg-muted border-border';
+    switch (sentimentType) {
+      case 'positive': return 'bg-success/10 text-success border-success/20';
+      case 'negative': return 'bg-destructive/10 text-destructive border-destructive/20';
+      default:         return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -38,7 +42,7 @@ const NewsCard = ({ article, index }: NewsCardProps) => {
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex items-center gap-2">
           <span className="stock-ticker text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
-            {article.stockSymbol}
+            {article.short_name}
           </span>
           <span className="text-xs text-muted-foreground">{article.source}</span>
         </div>
@@ -57,7 +61,7 @@ const NewsCard = ({ article, index }: NewsCardProps) => {
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted-foreground">
-          {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })}
+          {formatDistanceToNow(new Date(article.publish_time), { addSuffix: true })}
         </span>
         <a
           href={article.url}

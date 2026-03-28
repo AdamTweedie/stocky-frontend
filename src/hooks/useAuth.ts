@@ -43,11 +43,11 @@ export const useAuth = () => {
     }
   }, []);
 
-  const signup = useCallback(async (username: string, password: string) => {
+  const signup = useCallback(async (email: string, username: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiSignup(username, password);
+      const res = await apiSignup(email, username, password);
       persist(res.user, res.token);
     } catch (e: any) {
       setError(e.message || 'Signup failed');

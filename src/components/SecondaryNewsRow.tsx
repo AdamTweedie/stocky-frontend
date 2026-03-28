@@ -21,7 +21,7 @@ const SecondaryNewsRow = ({ articles, onArticleClick }: SecondaryNewsRowProps) =
         >
           <div className="space-y-2">
             <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-              {article.category || 'Markets'}
+              {article.source || 'Markets'}
             </span>
             <h4 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">
               {article.title}

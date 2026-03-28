@@ -21,11 +21,14 @@ export interface AuthResponse {
   token: string;
 }
 
-export const signup = async (username: string, password: string): Promise<AuthResponse> => {
-  const res = await fetch(`${API_CONFIG.STOCKS_BASE_URL}/auth/signup`, {
+// -----------------
+// EMAIL / PASSWORD
+// -----------------
+export const signup = async (email: string, name: string, password: string): Promise<AuthResponse> => {
+  const res = await fetch(`${API_CONFIG.AUTH_BASE_URL}/register`, {
     method: 'POST',
     headers: apiHeaders(),
-    body: JSON.stringify({ username: username.trim(), password }),
+    body: JSON.stringify({ email, name: name.trim(), password }),
   });
   if (!res.ok) {
     const err = await res.text();
@@ -35,7 +38,7 @@ export const signup = async (username: string, password: string): Promise<AuthRe
 };
 
 export const login = async (username: string, password: string): Promise<AuthResponse> => {
-  const res = await fetch(`${API_CONFIG.STOCKS_BASE_URL}/auth/login`, {
+  const res = await fetch(`${API_CONFIG.AUTH_BASE_URL}/login`, {
     method: 'POST',
     headers: apiHeaders(),
     body: JSON.stringify({ username: username.trim(), password }),
@@ -47,13 +50,16 @@ export const login = async (username: string, password: string): Promise<AuthRes
   return res.json();
 };
 
-export const googleSignIn = (): void => {
-  window.location.href = `${API_CONFIG.STOCKS_BASE_URL}/auth/google`;
-};
-
 export const logout = async (token: string): Promise<void> => {
-  await fetch(`${API_CONFIG.STOCKS_BASE_URL}/auth/logout`, {
+  await fetch(`${API_CONFIG.AUTH_BASE_URL}/logout`, {
     method: 'POST',
     headers: { ...apiHeaders(), Authorization: `Bearer ${token}` },
   });
 };
+
+
+export const googleSignIn = (): void => {
+  window.location.href = `${API_CONFIG.AUTH_BASE_URL}/google`;
+};
+
+

@@ -11,7 +11,7 @@ interface FeaturedNewsCardProps {
 const FeaturedNewsCard = ({ article, size, onArticleClick }: FeaturedNewsCardProps) => {
   const isLarge = size === 'large';
   const isMedium = size === 'medium';
-  const showImage = (isLarge || isMedium) && article.imageUrl;
+  const showImage = (isLarge || isMedium) && article.url;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -26,7 +26,7 @@ const FeaturedNewsCard = ({ article, size, onArticleClick }: FeaturedNewsCardPro
           {showImage && (
             <div className={`relative overflow-hidden ${isLarge ? 'h-48' : 'h-32'}`}>
               <img
-                src={article.imageUrl}
+                src={article.image}
                 alt={article.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
@@ -38,20 +38,9 @@ const FeaturedNewsCard = ({ article, size, onArticleClick }: FeaturedNewsCardPro
           <div className={`flex-1 flex flex-col ${isLarge ? 'p-6' : isMedium ? 'p-5' : 'p-4'}`}>
             {/* Tags row */}
             <div className="flex items-center gap-2 mb-3">
-              {article.isExclusive && (
-                <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">
-                  Exclusive
-                </span>
-              )}
-              {article.isLive && (
-                <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-success">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  Live
-                </span>
-              )}
-              {article.category && (
+              {article.source && (
                 <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                  {article.category}
+                  {article.source}
                 </span>
               )}
             </div>
@@ -75,10 +64,10 @@ const FeaturedNewsCard = ({ article, size, onArticleClick }: FeaturedNewsCardPro
             {/* Stock badge */}
             <div className="flex items-center gap-2 mt-auto">
               <span className="stock-ticker text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                {article.stockSymbol}
+                {article.short_name}
               </span>
               <span className="text-xs text-muted-foreground">
-                {article.source} • {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })}
+                {article.source} • {formatDistanceToNow(new Date(article.publish_time), { addSuffix: true })}
               </span>
             </div>
 

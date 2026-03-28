@@ -1,74 +1,106 @@
 import { useState, useEffect } from 'react';
 import { Stock } from '@/types/stock';
-// popularStocks import removed — price data now comes from the API
-import { syncWatchlist, getStockQuote, getStockQuotes } from '@/services/stockApi';
-
-const STORAGE_KEY = 'stock-watchlist';
+import {
+  getWatchlist,
+  getStockQuotes,
+  addToWatchlist,
+  removeFromWatchlist,
+  reorderWatchlist,
+} from '@/services/stockApi';
 
 export const useWatchlist = () => {
   const [watchlist, setWatchlist] = useState<Stock[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const symbols = JSON.parse(stored) as string[];
-        if (symbols.length === 0) return;
+    const token = localStorage.getItem('token');
 
-        // Set placeholder entries immediately so the UI shows symbols
-        const placeholders = symbols.map(symbol => ({ symbol, name: symbol }));
-        setWatchlist(placeholders);
+    if (token) {
+      // authenticated — fetch watchlist from backend
+      getWatchlist()
+        .then(setWatchlist)
+        .catch(err => setError(err.message))
+        .finally(() => setLoading(false));
+    } else {
+      // unauthenticated — load symbols from localStorage and fetch quotes
+      const stored = localStorage.getItem('watchlist');
+      if (stored) {
+        try {
+          const symbols = JSON.parse(stored) as string[];
+          if (symbols.length === 0) {
+            setLoading(false);
+            return;
+          }
 
-        // Fetch real price data from the API
-        getStockQuotes(symbols)
-          .then((quotes) => {
-            setWatchlist(prev =>
-              prev.map(s => {
-                const q = quotes.find(q => q.symbol === s.symbol);
-                return q ? { ...s, ...q } : s;
-              })
-            );
-          })
-          .catch(err => console.error('Failed to fetch quotes on load:', err));
-      } catch (e) {
-        console.error('Failed to parse watchlist:', e);
+          const placeholders: Stock[] = symbols.map(symbol => ({
+            symbol,
+            name: symbol,
+            currencyCode: null,
+            type: null,
+            industry: null,
+            price: null,
+            change: null,
+            changePercent: null,
+            inFreeTier: null,
+            inUse: null,
+          }));
+          setWatchlist(placeholders);
+
+          getStockQuotes(symbols)
+            .then(quotes => {
+              setWatchlist(prev =>
+                prev.map(s => quotes.find(q => q.symbol === s.symbol) ?? s)
+              );
+            })
+            .catch(err => setError(err.message))
+            .finally(() => setLoading(false));
+        } catch {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
       }
     }
   }, []);
 
-  const addStock = (stock: Stock) => {
+  const addStock = async (stock: Stock): Promise<void> => {
     if (watchlist.some(s => s.symbol === stock.symbol)) return;
-    
-    const newWatchlist = [...watchlist, stock];
-    setWatchlist(newWatchlist);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newWatchlist.map(s => s.symbol)));
 
-    // Fetch price data for the new stock
-    getStockQuote(stock.symbol.toString())
-      .then((quotes) => {
-        setWatchlist(prev =>
-          prev.map(s => {
-            const q = quotes.find(q => q.symbol === s.symbol);
-            return q ? { ...s, ...q } : s;
-          })
-        );
-      })
-      .catch(err => console.error('Quote fetch failed:', err));
+    const token = localStorage.getItem('token');
 
-    // Sync full watchlist to backend
-    syncWatchlist(newWatchlist.map(s => ({ symbol: s.symbol, name: s.name })))
-      .catch(err => console.error('Watchlist sync failed:', err));
+    if (token) {
+      await addToWatchlist(stock.symbol);
+      setWatchlist(prev => [...prev, stock]);
+    } else {
+      const newWatchlist = [...watchlist, stock];
+      setWatchlist(newWatchlist);
+      localStorage.setItem('watchlist', JSON.stringify(newWatchlist.map(s => s.symbol)));
+    }
   };
 
-  const removeStock = (symbol: string) => {
-    const newWatchlist = watchlist.filter(s => s.symbol !== symbol);
-    setWatchlist(newWatchlist);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newWatchlist.map(s => s.symbol)));
+  const removeStock = async (symbol: string): Promise<void> => {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      await removeFromWatchlist(symbol);
+    } else {
+      const newWatchlist = watchlist.filter(s => s.symbol !== symbol);
+      localStorage.setItem('watchlist', JSON.stringify(newWatchlist.map(s => s.symbol)));
+    }
+    setWatchlist(prev => prev.filter(s => s.symbol !== symbol));
   };
 
-  const isInWatchlist = (symbol: string) => {
-    return watchlist.some(s => s.symbol === symbol);
+  const reorder = async (orderedSymbols: string[]): Promise<void> => {
+    const token = localStorage.getItem('token');
+    if (token) await reorderWatchlist(orderedSymbols);
+    setWatchlist(prev =>
+      orderedSymbols.map(sym => prev.find(s => s.symbol === sym)!).filter(Boolean)
+    );
   };
 
-  return { watchlist, addStock, removeStock, isInWatchlist };
+  const isInWatchlist = (symbol: string): boolean =>
+    watchlist.some(s => s.symbol === symbol);
+
+  return { watchlist, loading, error, addStock, removeStock, reorder, isInWatchlist };
 };

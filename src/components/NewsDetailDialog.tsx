@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ExternalLink, TrendingUp, TrendingDown, Minus, Clock, Bot, Loader2, Sparkles } from 'lucide-react';
 import { NewsArticle } from '@/types/stock';
 import { formatDistanceToNow } from 'date-fns';
-import { getArticleAiSummary } from '@/services/stockApi';
+import { getArticleAiSummary } from '@/services/newsApi';
 import StreamingText from './StreamingText';
 import {
   Dialog,
@@ -28,10 +28,14 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
     setAiLoading(true);
     setAiError(null);
     try {
-      const summary = await getArticleAiSummary(article.id, article.title, article.description);
-      setAiSummary(summary);
+      const result = await getArticleAiSummary(article.id);
+      setAiSummary(result.summary);
     } catch (e) {
-      setAiError(e instanceof Error ? e.message : 'Failed to fetch AI summary');
+      if (e instanceof Error && e.message === 'upgrade_required') {
+        setAiError('This feature requires a pro subscription');
+      } else {
+        setAiError(e instanceof Error ? e.message : 'Failed to fetch AI summary');
+      }
     } finally {
       setAiLoading(false);
     }
@@ -47,36 +51,37 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
 
   if (!article) return null;
 
+  // sentiment is a number: > 0.2 positive, < -0.2 negative, else neutral
+  const getSentimentType = () => {
+    if (article.sentiment === null) return 'neutral';
+    if (article.sentiment > 0.2) return 'positive';
+    if (article.sentiment < -0.2) return 'negative';
+    return 'neutral';
+  };
+
+  const sentimentType = getSentimentType();
+
   const getSentimentIcon = () => {
-    switch (article.sentiment) {
-      case 'positive':
-        return <TrendingUp className="w-4 h-4 text-success" />;
-      case 'negative':
-        return <TrendingDown className="w-4 h-4 text-destructive" />;
-      default:
-        return <Minus className="w-4 h-4 text-muted-foreground" />;
+    switch (sentimentType) {
+      case 'positive': return <TrendingUp className="w-4 h-4 text-success" />;
+      case 'negative': return <TrendingDown className="w-4 h-4 text-destructive" />;
+      default:         return <Minus className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
   const getSentimentLabel = () => {
-    switch (article.sentiment) {
-      case 'positive':
-        return 'Positive Outlook';
-      case 'negative':
-        return 'Negative Outlook';
-      default:
-        return 'Neutral';
+    switch (sentimentType) {
+      case 'positive': return 'Positive Outlook';
+      case 'negative': return 'Negative Outlook';
+      default:         return 'Neutral';
     }
   };
 
   const getSentimentBg = () => {
-    switch (article.sentiment) {
-      case 'positive':
-        return 'bg-success/10 text-success border-success/20';
-      case 'negative':
-        return 'bg-destructive/10 text-destructive border-destructive/20';
-      default:
-        return 'bg-muted text-muted-foreground border-border';
+    switch (sentimentType) {
+      case 'positive': return 'bg-success/10 text-success border-success/20';
+      case 'negative': return 'bg-destructive/10 text-destructive border-destructive/20';
+      default:         return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -85,20 +90,12 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
       <DialogContent className="sm:max-w-2xl glass-card border-primary/20">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
-            {article.isExclusive && (
-              <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">
-                Exclusive
-              </span>
-            )}
-            {article.isLive && (
-              <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-success">
-                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                Live
-              </span>
-            )}
-            {article.category && (
+            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              {article.source}
+            </span>
+            {article.source_country && (
               <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                {article.category}
+                {article.source_country}
               </span>
             )}
           </div>
@@ -111,12 +108,12 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
           {/* Meta info row */}
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <span className="stock-ticker font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
-              {article.stockSymbol}
+              {article.short_name}
             </span>
             <span className="text-muted-foreground">{article.source}</span>
             <span className="flex items-center gap-1 text-muted-foreground">
               <Clock className="w-3.5 h-3.5" />
-              {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })}
+              {formatDistanceToNow(new Date(article.publish_time), { addSuffix: true })}
             </span>
           </div>
 
@@ -124,19 +121,20 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${getSentimentBg()}`}>
             {getSentimentIcon()}
             <span className="text-xs font-medium">{getSentimentLabel()}</span>
+            {article.sentiment !== null && (
+              <span className="text-xs opacity-70">({article.sentiment.toFixed(2)})</span>
+            )}
           </div>
 
-          {/* Summary / Description */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Summary</h4>
-            <p className="text-muted-foreground leading-relaxed">
-              {article.description}
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              This article covers recent developments regarding {article.stockSymbol} and its impact on the {article.category?.toLowerCase() || 'market'} sector. 
-              Analysts are closely monitoring the situation as it may affect investor sentiment and trading activity in the coming sessions.
-            </p>
-          </div>
+          {/* Description */}
+          {article.description && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Summary</h4>
+              <p className="text-muted-foreground leading-relaxed">
+                {article.description}
+              </p>
+            </div>
+          )}
 
           {/* AI Summary Section */}
           <div className="space-y-3">

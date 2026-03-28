@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Bot, Loader2, Sparkles } from 'lucide-react';
 import { Stock } from '@/types/stock';
-import { getStockAiSummary } from '@/services/stockApi';
+import { getStockAiSummary } from '@/services/newsApi';
+import { AISummary } from '@/types/stock';
 import StreamingText from './StreamingText';
 import {
   Dialog,
@@ -19,7 +20,7 @@ interface AiStockSummaryDialogProps {
 
 const AiStockSummaryDialog = ({ open, onOpenChange, stocks }: AiStockSummaryDialogProps) => {
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
-  const [summary, setSummary] = useState<string | null>(null);
+  const [summary, setSummary] = useState<AISummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +34,13 @@ const AiStockSummaryDialog = ({ open, onOpenChange, stocks }: AiStockSummaryDial
       const result = await getStockAiSummary(symbol);
       setSummary(result);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to fetch AI summary');
+      if (e instanceof Error && e.message === 'upgrade_required') {
+        setError('This feature requires a pro subscription');
+      } else if (e instanceof Error && e.message === 'unauthorized') {
+        setError('Please log in to use this feature');
+      } else {
+        setError(e instanceof Error ? e.message : 'Failed to fetch AI summary');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +107,7 @@ const AiStockSummaryDialog = ({ open, onOpenChange, stocks }: AiStockSummaryDial
                 AI Summary — {selectedSymbol}
               </div>
               <p className="text-foreground leading-relaxed whitespace-pre-line">
-                <StreamingText text={summary} speed={30} />
+                <StreamingText text={summary.summary} speed={30} />
               </p>
             </div>
           )}

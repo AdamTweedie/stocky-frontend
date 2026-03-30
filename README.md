@@ -16,8 +16,15 @@ npm i
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-## What technologies are used for this project?
 
+## Base URL
+The server connects to the backend via:
+```
+STOCKS_BASE_URL: 'http://127.0.0.1:5000/stocks'
+AUTH_BASE_URL: 'http://127.0.0.1:5000/auth'
+NEWS_BASE_URL: 'http://127.0.0.1:5000/news'
+USER_BASE_URL: 'http://127.0.0.1:5000/user'
+```
 This project is built with:
 
 - Vite

@@ -57,6 +57,6 @@ export const getArticleAiSummary = async (id: number): Promise<AISummary> => {
 };
 
 export const getStockAiSummary = async (symbol: string): Promise<AISummary> => {
-  const data = await apiFetch<AISummary>(`/summary/${symbol}`);
+  const data = await apiFetch<AISummary>(`/stock_ai_summary/${symbol}`);
   return data;
 };

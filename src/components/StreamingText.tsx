@@ -12,7 +12,7 @@ const getDelay = (char: string, baseSpeed: number) => {
   return baseSpeed;
 };
 
-const StreamingText = ({ text, speed = 20, className = '' }: StreamingTextProps) => {
+const StreamingText = ({ text, speed = 15, className = '' }: StreamingTextProps) => {
   const [visibleText, setVisibleText] = useState('');
   const indexRef = useRef(0)
   const frameRef = useRef<number | null>(null);

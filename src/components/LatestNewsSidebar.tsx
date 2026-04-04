@@ -13,12 +13,16 @@ const LatestNewsSidebar = ({ articles, onArticleClick }: LatestNewsSidebarProps)
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter articles by search query
-  const filteredArticles = articles.filter((article) =>
-    searchQuery.trim() === '' ||
-    article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.short_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredArticles = articles
+    .filter((article) =>
+      searchQuery.trim() === '' ||
+      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (article.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+      article.short_name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.publish_time).getTime() - new Date(a.publish_time).getTime());
+
+
 
   // Show only the most recent 8 articles
   const latestArticles = filteredArticles.slice(0, 8);

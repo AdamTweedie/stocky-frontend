@@ -169,7 +169,7 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
                   AI Summary
                 </div>
                 <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
-                  <StreamingText text={aiSummary} speed={30} />
+                  <StreamingText text={aiSummary}/>
                 </p>
               </div>
             )}

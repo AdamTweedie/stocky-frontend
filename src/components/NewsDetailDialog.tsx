@@ -29,7 +29,7 @@ const NewsDetailDialog = ({ article, open, onOpenChange }: NewsDetailDialogProps
     setAiError(null);
     try {
       const result = await getArticleAiSummary(article.id);
-      setAiSummary(result.summary);
+      setAiSummary(result.ai_summary);
     } catch (e) {
       if (e instanceof Error && e.message === 'upgrade_required') {
         setAiError('This feature requires a pro subscription');

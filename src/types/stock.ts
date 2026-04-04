@@ -76,11 +76,8 @@ export interface SentimentHistory {
 }
 
 export interface AISummary {
-    short_name: string
-    summary: string
-    articles_used: number
-    tokens_in: number
-    tokens_out: number
+    id: string
+    ai_summary: string 
 }
 
 // API list response wrappers

@@ -107,7 +107,7 @@ const AiStockSummaryDialog = ({ open, onOpenChange, stocks }: AiStockSummaryDial
                 AI Summary — {selectedSymbol}
               </div>
               <p className="text-foreground leading-relaxed whitespace-pre-line">
-                <StreamingText text={summary.summary} speed={30} />
+                <StreamingText text={summary.ai_summary} speed={30} />
               </p>
             </div>
           )}

@@ -40,23 +40,23 @@ export const getMultipleStockNews = async (symbols: string[], since?: string): P
 
 export const getWatchlistNews = async (since?: string): Promise<NewsArticle[]> => {
   const params = since ? `?since=${since}` : '';
-  const data = await apiFetch<NewsListResponse>(`/watchlist${params}`, true);
+  const data = await apiFetch<NewsListResponse>(`/watchlist${params}`);
   return data.results;
 };
 
 export const getStockNews = async (symbol: string, since?: string): Promise<NewsArticle[]> => {
   const params = new URLSearchParams({ q: symbol });
   if (since) params.append('since', since);
-  const data = await apiFetch<NewsListResponse>(`/symbol_premium?${params.toString()}`, true);
+  const data = await apiFetch<NewsListResponse>(`/symbol_premium?${params.toString()}`);
   return data.results;
 };
 
 export const getArticleAiSummary = async (id: number): Promise<AISummary> => {
-  const data = await apiFetch<AISummary>(`/article/${id}/summary`, true);
+  const data = await apiFetch<AISummary>(`/article_ai_summary/${id}`);
   return data;
 };
 
 export const getStockAiSummary = async (symbol: string): Promise<AISummary> => {
-  const data = await apiFetch<AISummary>(`/summary/${symbol}`, true);
+  const data = await apiFetch<AISummary>(`/summary/${symbol}`);
   return data;
 };

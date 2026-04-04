@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react';
 import { NewsArticle } from '@/types/stock';
 import { formatDistanceToNow } from 'date-fns';
+import {useState} from 'react';
 
 interface FeaturedNewsCardProps {
   article: NewsArticle;
@@ -11,8 +12,9 @@ interface FeaturedNewsCardProps {
 const FeaturedNewsCard = ({ article, size, onArticleClick }: FeaturedNewsCardProps) => {
   const isLarge = size === 'large';
   const isMedium = size === 'medium';
-  const showImage = (isLarge || isMedium) && article.url;
-
+  const [imageError, setImageError] = useState(false)
+  const showImage = (isLarge || isMedium) && article.image && !imageError;
+  
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     onArticleClick?.(article);
@@ -28,6 +30,7 @@ const FeaturedNewsCard = ({ article, size, onArticleClick }: FeaturedNewsCardPro
               <img
                 src={article.image}
                 alt={article.title}
+                onError={() => setImageError(true)}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />

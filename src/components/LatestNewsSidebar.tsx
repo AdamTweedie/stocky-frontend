@@ -22,8 +22,6 @@ const LatestNewsSidebar = ({ articles, onArticleClick }: LatestNewsSidebarProps)
     )
     .sort((a, b) => new Date(b.publish_time).getTime() - new Date(a.publish_time).getTime());
 
-
-
   // Show only the most recent 8 articles
   const latestArticles = filteredArticles.slice(0, 8);
 

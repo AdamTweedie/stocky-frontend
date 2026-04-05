@@ -23,7 +23,7 @@ interface NewsFeedProps {
 }
 
 const NewsFeed = ({ watchlist }: NewsFeedProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [shuffleKey, setShuffleKey] = useState(0);
   const [isShaking, setIsShaking] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
@@ -43,8 +43,8 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
 
   // Filtered and sorted news
   const shuffledMainNews = useMemo(() => {
-    let filtered = selectedCategory 
-      ? allNews.filter((article) => article.source === selectedCategory)
+    let filtered = selectedCategories.length > 0
+      ? allNews.filter(article => selectedCategories.includes(article.source ?? ''))
       : [...allNews];
 
     // Filter by stock
@@ -84,7 +84,7 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
     }
     
     return filtered;
-  }, [allNews, selectedCategory, shuffleKey, sortBy, filterStock, filterSentiment]);
+  }, [allNews, selectedCategories, shuffleKey, sortBy, filterStock, filterSentiment]);
 
   const handleRefresh = useCallback(() => {
     setIsShaking(true);
@@ -289,9 +289,10 @@ const NewsFeed = ({ watchlist }: NewsFeedProps) => {
             <LatestNewsSidebar articles={sidebarArticles} onArticleClick={handleArticleClick} />
           </div>
           <div className="glass-card p-4">
-            <FocusSection 
-              selectedCategory={selectedCategory} 
-              onCategorySelect={setSelectedCategory}
+            <FocusSection
+              articles={allNews}
+              selectedCategories={selectedCategories}
+              onCategorySelect={setSelectedCategories}
             />
           </div>
         </div>

@@ -1,31 +1,36 @@
+import { NewsArticle } from '@/types/stock';
+
 interface FocusSectionProps {
-  selectedCategory: string | null;
-  onCategorySelect: (category: string | null) => void;
+  articles: NewsArticle[];
+  selectedCategories: string[];
+  onCategorySelect: (categories: string[]) => void;
 }
 
-const FOCUS_CATEGORIES = [
-  'bloomberg.com',
-  'reuters.com',
-  'wsj.com',
-  'ft.com',
-  'cnbc.com',
-  'marketwatch.com',
-  'seekingalpha.com',
-  'barrons.com',
-];
+const FocusSection = ({ articles, selectedCategories, onCategorySelect }: FocusSectionProps) => {
+  
+  const availableCategories = [...new Set(
+    articles.map(a => a.source).filter(Boolean)
+  )].sort();
 
-const FocusSection = ({ selectedCategory, onCategorySelect }: FocusSectionProps) => {
+  const toggleCategory = (category: string) => {
+    if (selectedCategories.includes(category)) {
+      onCategorySelect(selectedCategories.filter(c => c !== category));
+    } else {
+      onCategorySelect([...selectedCategories, category]);
+    }
+  };
+
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">In Focus</h3>
       
       <div className="flex flex-wrap gap-2">
-        {FOCUS_CATEGORIES.map((category) => (
+        {availableCategories.map((category) => (
           <button
             key={category}
-            onClick={() => onCategorySelect(selectedCategory === category ? null : category)}
+            onClick={() => toggleCategory(category)}
             className={`px-3 py-1.5 text-xs font-medium rounded-md border transition-all ${
-              selectedCategory === category
+              selectedCategories.includes(category)
                 ? 'bg-primary text-primary-foreground border-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)]'
                 : 'bg-card/50 text-foreground border-border/50 hover:border-primary/50 hover:text-primary'
             }`}

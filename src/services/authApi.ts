@@ -1,65 +1,90 @@
+import { User } from '@/types/stock';
 import { API_CONFIG } from '@/config/features';
 
-const apiHeaders = (): HeadersInit => {
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (API_CONFIG.API_KEY) {
-    headers[API_CONFIG.API_KEY_HEADER] = API_CONFIG.API_KEY;
-  }
-  return headers;
-};
+const BASE = API_CONFIG.AUTH_BASE_URL;
 
-export interface AuthUser {
-  id: string;
-  username: string;
-  email?: string;
-  displayName?: string;
-  avatar?: string;
-}
+const jsonHeaders = (): HeadersInit => ({ 'Content-Type': 'application/json' });
+
+const authHeaders = (): HeadersInit => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
 
 export interface AuthResponse {
-  user: AuthUser;
-  token: string;
+  session_token: string;
+  ok: boolean;
 }
 
-// -----------------
-// EMAIL / PASSWORD
-// -----------------
-export const signup = async (email: string, name: string, password: string): Promise<AuthResponse> => {
-  const res = await fetch(`${API_CONFIG.AUTH_BASE_URL}/register`, {
+export const register = async (email: string, name: string, password: string): Promise<AuthResponse> => {
+  const res = await fetch(`${BASE}/register`, {
     method: 'POST',
-    headers: apiHeaders(),
-    body: JSON.stringify({ email, name: name.trim(), password }),
+    headers: jsonHeaders(),
+    body: JSON.stringify({ email, name, password }),
   });
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || `Signup failed (${res.status})`);
+    const err = await res.json();
+    throw new Error(err.detail || `Registration failed (${res.status})`);
   }
   return res.json();
 };
 
-export const login = async (username: string, password: string): Promise<AuthResponse> => {
-  const res = await fetch(`${API_CONFIG.AUTH_BASE_URL}/login`, {
+export const login = async (email: string, password: string): Promise<AuthResponse> => {
+  const res = await fetch(`${BASE}/login`, {
     method: 'POST',
-    headers: apiHeaders(),
-    body: JSON.stringify({ username: username.trim(), password }),
+    headers: jsonHeaders(),
+    body: JSON.stringify({ email, password }),
   });
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || `Login failed (${res.status})`);
+    const err = await res.json();
+    throw new Error(err.detail || `Login failed (${res.status})`);
   }
   return res.json();
 };
 
-export const logout = async (token: string): Promise<void> => {
-  await fetch(`${API_CONFIG.AUTH_BASE_URL}/logout`, {
+export const logout = async (): Promise<void> => {
+  await fetch(`${BASE}/logout`, {
     method: 'POST',
-    headers: { ...apiHeaders(), Authorization: `Bearer ${token}` },
+    headers: authHeaders(),
   });
+  localStorage.removeItem('token');
 };
 
+export const getMe = async (): Promise<User> => {
+  const res = await fetch(`${BASE}/me`, { headers: authHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch user');
+  return res.json();
+};
 
 export const googleSignIn = (): void => {
-  window.location.href = `${API_CONFIG.AUTH_BASE_URL}/google`;
+  window.location.href = `${BASE}/google`;
 };
 
+export const handleGoogleCallback = (): string | null => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (token) {
+    localStorage.setItem('token', token);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  return token;
+};
 
+export const forgotPassword = async (email: string): Promise<void> => {
+  await fetch(`${BASE}/forgot-password`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify({ email }),
+  });
+};
+
+export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
+  const res = await fetch(`${BASE}/reset-password`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+  if (!res.ok) throw new Error('Invalid or expired reset token');
+};

@@ -71,3 +71,13 @@ export const unfollowIndustry = async (industry: string): Promise<void> => {
   });
   if (!res.ok) throw new Error('Failed to unfollow industry');
 };
+
+export const upgradeSubscription = async (tier: string): Promise<{ checkout_url?: string }> => {
+  const res = await fetch(`${BASE}/subscription/upgrade`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ tier }),
+  });
+  if (!res.ok) throw new Error('Failed to upgrade subscription');
+  return res.json();
+};

@@ -61,11 +61,11 @@ export const useAuth = () => {
     }
   }, []);
 
-  const register = useCallback(async (email: string, name: string, password: string) => {
+  const register = useCallback(async (email: string, name: string, password: string, tier: string = 'free') => {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiRegister(email, name, password);
+      const res = await apiRegister(email, name, password, tier);
       persist(res.session_token);
     } catch (e: any) {
       setError(e.message || 'Registration failed');

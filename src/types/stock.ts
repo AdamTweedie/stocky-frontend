@@ -31,7 +31,7 @@ export interface NewsArticle {
   ai_summary: string | null;
 }
 
-export type Tier = "free" | "pro" | "enterprise";
+export type Tier = "free" | "basic" | "pro";
 export type TierStatus = "active" | "cancelled" | "past_due" | "paused";
 
 export interface User {

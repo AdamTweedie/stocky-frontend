@@ -18,11 +18,11 @@ export interface AuthResponse {
   ok: boolean;
 }
 
-export const register = async (email: string, name: string, password: string): Promise<AuthResponse> => {
+export const register = async (email: string, name: string, password: string, tier: string): Promise<AuthResponse> => {
   const res = await fetch(`${BASE}/register`, {
     method: 'POST',
     headers: jsonHeaders(),
-    body: JSON.stringify({ email, name, password }),
+    body: JSON.stringify({ email, name, password, tier }),
   });
   if (!res.ok) {
     const err = await res.json();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, ArrowLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,13 +8,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { Tier } from '@/types/stock';
+
+const TIERS: { value: Tier; label: string; price: string; features: string[] }[] = [
+  { value: 'free', label: 'Free', price: '$0/mo', features: ['Basic news feed', 'Up to 3 watchlist stocks', 'Limited AI summaries'] },
+  { value: 'basic', label: 'Basic', price: '$9.99/mo', features: ['Full news feed', 'Up to 15 watchlist stocks', 'Unlimited AI summaries', 'Sentiment analysis'] },
+  { value: 'pro', label: 'Pro', price: '$29.99/mo', features: ['Everything in Basic', 'Unlimited watchlist', 'Priority AI summaries', 'Industry insights', 'API access'] },
+];
 
 const Auth = () => {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { login, signup, googleSignIn, loading, error } = useAuth();
+  const [selectedTier, setSelectedTier] = useState<Tier>('free');
+  const { login, register, googleSignIn, loading, error } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -42,7 +50,7 @@ const Auth = () => {
       return;
     }
     try {
-      await signup(email, username, password);
+      await register(email, username, password, selectedTier);
       toast({ title: 'Account created!' });
       navigate('/');
     } catch (err: any) {
@@ -51,8 +59,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-md border-border/50 bg-card/80 backdrop-blur-xl">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
+      <Card className="w-full max-w-2xl border-border/50 bg-card/80 backdrop-blur-xl relative">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="absolute top-4 left-4 gap-1"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -72,10 +89,10 @@ const Auth = () => {
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-username">Username</Label>
+                  <Label htmlFor="login-identifier">Email or Username</Label>
                   <Input
-                    id="login-username"
-                    placeholder="Enter your username"
+                    id="login-identifier"
+                    placeholder="Enter your email or username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
@@ -100,6 +117,17 @@ const Auth = () => {
 
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-username">Username</Label>
                   <Input
@@ -132,8 +160,40 @@ const Auth = () => {
                     required
                   />
                 </div>
+
+                <div className="space-y-3">
+                  <Label>Choose your plan</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {TIERS.map((tier) => (
+                      <button
+                        key={tier.value}
+                        type="button"
+                        onClick={() => setSelectedTier(tier.value)}
+                        className={`relative rounded-lg border p-3 text-left transition-all ${
+                          selectedTier === tier.value
+                            ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                            : 'border-border hover:border-primary/40'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-sm">{tier.label}</span>
+                          {selectedTier === tier.value && (
+                            <Check className="w-4 h-4 text-primary" />
+                          )}
+                        </div>
+                        <p className="text-xs font-medium text-primary mb-2">{tier.price}</p>
+                        <ul className="space-y-1">
+                          {tier.features.map((f) => (
+                            <li key={f} className="text-[11px] text-muted-foreground">• {f}</li>
+                          ))}
+                        </ul>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Creating account…' : 'Create Account'}
+                  {loading ? 'Creating account…' : selectedTier === 'free' ? 'Create Free Account' : `Subscribe to ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`}
                 </Button>
               </form>
             </TabsContent>

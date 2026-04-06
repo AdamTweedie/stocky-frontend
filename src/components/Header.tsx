@@ -38,10 +38,15 @@ const Header = () => {
             </Button>
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-1"
+                >
                   <User className="w-4 h-4" />
-                  {user?.username}
-                </span>
+                  {user?.name}
+                </Button>
                 <Button variant="ghost" size="sm" onClick={logout}>
                   <LogOut className="w-4 h-4 mr-1" />
                   Logout

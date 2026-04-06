@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Stock } from '@/types/stock';
 import {
-  getWatchlist,
   getStockQuotes,
+} from '@/services/stockApi';
+import {
+  getWatchlist,
   addToWatchlist,
   removeFromWatchlist,
   reorderWatchlist,
-} from '@/services/stockApi';
+} from '@/services/usersApi'
 
 export const useWatchlist = () => {
   const [watchlist, setWatchlist] = useState<Stock[]>([]);

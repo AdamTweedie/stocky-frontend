@@ -54,37 +54,3 @@ export const isStockFree = async (symbol: string): Promise<boolean> => {
   return data.is_free === 'True';
 };
 
-// ─── Authenticated ─────────────────────────────────────────
-
-export const getWatchlist = async (): Promise<Stock[]> => {
-  const data = await apiFetch<StockListResponse>('/watchlist', true);
-  return data.results;
-};
-
-export const addToWatchlist = async (shortName: string): Promise<void> => {
-  const res = await fetch(`${API_CONFIG.STOCKS_BASE_URL}/watchlist`, {
-    method: 'POST',
-    headers: getHeaders(true),
-    body: JSON.stringify({ short_name: shortName }),
-  });
-  if (res.status === 403) throw new Error('upgrade_required');
-  if (res.status === 409) throw new Error('already_in_watchlist');
-  if (!res.ok) throw new Error(`Failed to add to watchlist: ${res.statusText}`);
-};
-
-export const removeFromWatchlist = async (shortName: string): Promise<void> => {
-  const res = await fetch(`${API_CONFIG.STOCKS_BASE_URL}/watchlist/${shortName}`, {
-    method: 'DELETE',
-    headers: getHeaders(true),
-  });
-  if (!res.ok) throw new Error(`Failed to remove from watchlist: ${res.statusText}`);
-};
-
-export const reorderWatchlist = async (orderedShortNames: string[]): Promise<void> => {
-  const res = await fetch(`${API_CONFIG.STOCKS_BASE_URL}/watchlist/reorder`, {
-    method: 'PUT',
-    headers: getHeaders(true),
-    body: JSON.stringify({ ordered_short_names: orderedShortNames }),
-  });
-  if (!res.ok) throw new Error(`Failed to reorder watchlist: ${res.statusText}`);
-};
